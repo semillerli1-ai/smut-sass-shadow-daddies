@@ -1,0 +1,865 @@
+import { useEffect, useState } from "react";
+import "./style.css";
+import { supabase } from "./supabaseClient";
+
+const CLUB_CODE = "SHADOWDADDY";
+const ADMIN_CODE = "SHADOWQUEEN";
+
+export default function App() {
+  const [avatar, setAvatar] = useState("");
+  const [membersMap, setMembersMap] = useState({});
+  const [access, setAccess] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [clubCode, setClubCode] = useState("");
+  const [adminCode, setAdminCode] = useState("");
+  const [memberName, setMemberName] = useState("");
+  const AVATARS = Array.from({ length: 8 }, (_, i) =>
+    `https://jepinzaptcydbczofaup.supabase.co/storage/v1/object/public/avatar/avatar${i + 1}.png`
+  );
+
+  const [page, setPage] = useState("home");
+  const [libraryPage, setLibraryPage] = useState("suggestions");
+  const [communityPage, setCommunityPage] = useState("notes");
+
+  const [meetings, setMeetings] = useState([]);
+  const [archiveMeetings, setArchiveMeetings] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [votes, setVotes] = useState([]);
+  const [notes, setNotes] = useState([]);
+  const [ratings, setRatings] = useState([]);
+  const [similarBooks, setSimilarBooks] = useState([]);
+  const [feedback, setFeedback] = useState([]);
+
+  const [bookTitle, setBookTitle] = useState("");
+  const [bookAuthor, setBookAuthor] = useState("");
+  const [whyRead, setWhyRead] = useState("");
+
+  const [note, setNote] = useState("");
+  const [noteType, setNoteType] = useState("Question");
+
+  const [selectedArchive, setSelectedArchive] = useState(null);
+
+  const [similarTitle, setSimilarTitle] = useState("");
+  const [similarAuthor, setSimilarAuthor] = useState("");
+  const [similarReason, setSimilarReason] = useState("");
+
+  const [feedbackType, setFeedbackType] = useState("App idea");
+  const [feedbackText, setFeedbackText] = useState("");
+
+  const [newMeetingDate, setNewMeetingDate] = useState("");
+  const [newMeetingTime, setNewMeetingTime] = useState("");
+  const [newMeetingBook, setNewMeetingBook] = useState("");
+  const [newMeetingAuthor, setNewMeetingAuthor] = useState("");
+
+  useEffect(() => {
+    const savedName = localStorage.getItem("memberName");
+    const savedAccess = localStorage.getItem("clubAccess");
+    const savedAdmin = localStorage.getItem("isAdmin");
+    const savedAvatar = localStorage.getItem("avatar");
+
+    if (savedName) setMemberName(savedName);
+    if (savedAccess === "true") setAccess(true);
+    if (savedAdmin === "true") setIsAdmin(true);
+    if (savedAvatar) setAvatar(savedAvatar);
+  }, []);
+
+  useEffect(() => {
+    if (access) loadEverything();
+    loadMembers();
+  }, [access]);
+
+  async function loadEverything() {
+    loadMeetings();
+    loadBooks();
+    loadVotes();
+    loadNotes();
+    loadRatings();
+    loadSimilarBooks();
+    loadFeedback();
+  }
+
+  async function loadMembers() {
+    const { data } = await supabase.from("members").select("*");
+    if (data) {
+      const map = {};
+      data.forEach(m => { map[m.member_name] = m.avatar_url; });
+      setMembersMap(map);
+    }
+  }
+
+  async function loadMeetings() {
+    const { data } = await supabase
+      .from("meetings")
+      .select("*")
+      .order("meeting_date");
+
+    if (!data) return;
+
+    const upcoming = [];
+    const archived = [];
+
+    data.forEach((m) => {
+      const meetingDate = new Date(m.meeting_date);
+      const now = new Date();
+      const diff = (now - meetingDate) / (1000 * 60 * 60 * 24);
+
+      if (diff > 1) archived.push(m);
+      else upcoming.push(m);
+    });
+
+    setMeetings(upcoming.slice(0, 3));
+    setArchiveMeetings(archived);
+  }
+
+  async function loadBooks() {
+    const { data } = await supabase
+      .from("book_suggestions")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (data) setBooks(data);
+  }
+
+  async function loadVotes() {
+    const { data } = await supabase.from("votes").select("*");
+    if (data) setVotes(data);
+  }
+
+  async function loadNotes() {
+    const { data } = await supabase
+      .from("notes")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (data) setNotes(data);
+  }
+
+  async function loadRatings() {
+    const { data } = await supabase.from("book_ratings").select("*");
+    if (data) setRatings(data);
+  }
+
+  async function loadSimilarBooks() {
+    const { data } = await supabase
+      .from("similar_books")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (data) setSimilarBooks(data);
+  }
+
+  async function loadFeedback() {
+    const { data } = await supabase
+      .from("app_feedback")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (data) setFeedback(data);
+  }
+
+  async function enterApp() {
+    if (clubCode === CLUB_CODE && memberName.trim() && avatar) {
+      await supabase.from("members").upsert(
+        { member_name: memberName, avatar_url: avatar },
+        { onConflict: "member_name" }
+      );
+
+      setAccess(true);
+      localStorage.setItem("clubAccess", "true");
+      localStorage.setItem("memberName", memberName);
+      localStorage.setItem("avatar", avatar);
+
+      if (adminCode === ADMIN_CODE) {
+        setIsAdmin(true);
+        localStorage.setItem("isAdmin", "true");
+      }
+    }
+  }
+
+  function logout() {
+    localStorage.clear();
+    setAccess(false);
+    setIsAdmin(false);
+    setClubCode("");
+    setAdminCode("");
+    setMemberName("");
+  }
+
+  async function addBook() {
+    if (!bookTitle.trim()) return;
+
+    await supabase.from("book_suggestions").insert({
+      title: bookTitle,
+      author: bookAuthor,
+      why_read: whyRead,
+      description: "",
+      suggested_by: memberName
+    });
+
+    setBookTitle("");
+    setBookAuthor("");
+    setWhyRead("");
+    loadBooks();
+  }
+
+  async function vote(bookId) {
+    const existing = votes.find(
+      (v) => v.suggestion_id === bookId && v.member_name === memberName
+    );
+
+    if (existing) {
+      await supabase.from("votes").delete().eq("id", existing.id);
+    } else {
+      await supabase.from("votes").insert({
+        suggestion_id: bookId,
+        member_name: memberName
+      });
+    }
+
+    loadVotes();
+  }
+
+  async function selectAsNextBook(book) {
+    const date = prompt("Meeting date? Use YYYY-MM-DD");
+    const time = prompt("Meeting time? Use HH:MM, e.g. 19:30");
+
+    if (!date || !time) return;
+
+    await supabase.from("meetings").insert({
+      meeting_date: date,
+      meeting_time: time,
+      book_title: book.title,
+      author: book.author,
+      vibe: "Chosen by book club vote"
+    });
+
+    await supabase.from("book_suggestions").delete().eq("id", book.id);
+
+    loadEverything();
+  }
+
+  async function addNote() {
+    if (!note.trim() || !meetings[0]) return;
+
+    await supabase.from("notes").insert({
+      note_text: note,
+      member_name: memberName,
+      note_type: noteType,
+      meeting_id: meetings[0].id
+    });
+
+    setNote("");
+    loadNotes();
+  }
+
+  async function rateBook(meetingId, rating) {
+    await supabase.from("book_ratings").upsert(
+      {
+        meeting_id: meetingId,
+        member_name: memberName,
+        rating
+      },
+      {
+        onConflict: "meeting_id,member_name"
+      }
+    );
+
+    loadRatings();
+  }
+
+  async function addSimilarBook(meetingId) {
+    if (!similarTitle.trim()) return;
+
+    await supabase.from("similar_books").insert({
+      meeting_id: meetingId,
+      title: similarTitle,
+      author: similarAuthor,
+      reason: similarReason,
+      recommended_by: memberName
+    });
+
+    setSimilarTitle("");
+    setSimilarAuthor("");
+    setSimilarReason("");
+    loadSimilarBooks();
+  }
+
+  async function addFeedback() {
+    if (!feedbackText.trim()) return;
+
+    await supabase.from("app_feedback").insert({
+      feedback_type: feedbackType,
+      feedback_text: feedbackText,
+      member_name: memberName
+    });
+
+    setFeedbackText("");
+    loadFeedback();
+  }
+
+  async function addMeeting() {
+    if (!newMeetingDate || !newMeetingTime || !newMeetingBook) return;
+
+    await supabase.from("meetings").insert({
+      meeting_date: newMeetingDate,
+      meeting_time: newMeetingTime,
+      book_title: newMeetingBook,
+      author: newMeetingAuthor,
+      vibe: "Admin added meeting"
+    });
+
+    setNewMeetingDate("");
+    setNewMeetingTime("");
+    setNewMeetingBook("");
+    setNewMeetingAuthor("");
+    loadMeetings();
+  }
+
+  function voteCount(bookId) {
+    return votes.filter((v) => v.suggestion_id === bookId).length;
+  }
+
+  function userVoted(bookId) {
+    return votes.find(
+      (v) => v.suggestion_id === bookId && v.member_name === memberName
+    );
+  }
+
+  function topThreeBooks() {
+    return [...books]
+      .sort((a, b) => voteCount(b.id) - voteCount(a.id))
+      .slice(0, 3);
+  }
+
+  function notesForMeeting(meetingId) {
+    return notes.filter((n) => n.meeting_id === meetingId);
+  }
+
+  function visibleNotesForCurrentMeeting() {
+    if (!meetings[0]) return [];
+
+    const meetingDate = new Date(meetings[0].meeting_date);
+    const now = new Date();
+    const hoursUntil = (meetingDate - now) / (1000 * 60 * 60);
+    const unlocked = hoursUntil <= 24;
+
+    const current = notesForMeeting(meetings[0].id);
+
+    if (unlocked) return current;
+    return current.filter((n) => n.member_name === memberName);
+  }
+
+  function notesUnlocked() {
+    if (!meetings[0]) return false;
+
+    const meetingDate = new Date(meetings[0].meeting_date);
+    const now = new Date();
+    const hoursUntil = (meetingDate - now) / (1000 * 60 * 60);
+
+    return hoursUntil <= 24;
+  }
+
+  function groupedNotes(noteList) {
+    const groups = {
+      Question: [],
+      Theory: [],
+      "Favourite Moment": [],
+      Other: []
+    };
+
+    noteList.forEach((n) => {
+      const type = n.note_type || "Other";
+      if (!groups[type]) groups[type] = [];
+      groups[type].push(n);
+    });
+
+    return groups;
+  }
+
+  function ratingsForMeeting(meetingId) {
+    return ratings.filter((r) => r.meeting_id === meetingId);
+  }
+
+  function averageRating(meetingId) {
+    const list = ratingsForMeeting(meetingId);
+    if (!list.length) return "No ratings yet";
+
+    const avg = list.reduce((sum, r) => sum + r.rating, 0) / list.length;
+    return `${avg.toFixed(1)} ⭐`;
+  }
+
+  function myRating(meetingId) {
+    return ratings.find(
+      (r) => r.meeting_id === meetingId && r.member_name === memberName
+    );
+  }
+
+  function similarForMeeting(meetingId) {
+    return similarBooks.filter((b) => b.meeting_id === meetingId);
+  }
+
+  function shareWhatsApp() {
+    const text = encodeURIComponent(
+      `Join Smut, Sass and Shadow Daddies ✨ ${window.location.href}`
+    );
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+  }
+
+  if (!access) {
+    return (
+      <div className="clubgate">
+        <h1 style={{ fontFamily: "'Metamorphous', cursive" }}>Smut, Sass and Shadow Daddies</h1>
+
+        <p className="intro">
+          Where FMCs make catastrophically questionable decisions — and we
+          support them, because the MMC is tall, dark, broody, and absolutely
+          not emotionally available ✨
+        </p>
+
+        <input
+          placeholder="Club code"
+          value={clubCode}
+          onChange={(e) => setClubCode(e.target.value)}
+        />
+
+        <input
+          placeholder="Your member name"
+          value={memberName}
+          onChange={(e) => setMemberName(e.target.value)}
+        />
+
+        <input
+          placeholder="Admin code, optional"
+          value={adminCode}
+          onChange={(e) => setAdminCode(e.target.value)}
+        />
+
+        <p style={{ margin: "0.5rem 0 0.25rem", color: "#f9c5d5", fontFamily: "'Cinzel', serif", fontSize: "0.85rem", letterSpacing: "0.05em" }}>
+          Choose your avatar
+        </p>
+        <div className="avatar-grid">
+          {AVATARS.map((url) => (
+            <button
+              key={url}
+              className={`avatar-btn ${avatar === url ? "selected" : ""}`}
+              onClick={() => setAvatar(url)}
+              type="button"
+              style={{ padding: 0, background: "transparent", border: "none", width: "100%" }}
+            >
+              <img
+                src={url}
+                alt="avatar"
+                className={`avatar-img ${avatar === url ? "selected" : ""}`}
+              />
+            </button>
+          ))}
+        </div>
+
+        <button onClick={enterApp}>Enter the shadow realm</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      <h1 style={{ fontFamily: "'Metamorphous', cursive" }}>Smut, Sass and Shadow Daddies</h1>
+      <p className="intro">Welcome back, {memberName} ✨</p>
+
+      {/* <div className="topnav">
+        <button onClick={() => setPage("home")}>Home</button>
+        <button onClick={() => setPage("library")}>Library</button>
+        <button onClick={() => setPage("community")}>Community</button>
+      </div> */}
+
+      <button className="whatsapp" onClick={shareWhatsApp}>
+        Share via WhatsApp
+      </button>
+
+      <button onClick={logout}>Forget me / switch member</button>
+
+      {page === "home" && (
+        <section className="card">
+          <h2>Next Meeting</h2>
+
+          {meetings[0] ? (
+            <div className="item">
+              <strong>{meetings[0].book_title}</strong>
+              <p>by {meetings[0].author}</p>
+              <p>
+                {meetings[0].meeting_date} at {meetings[0].meeting_time}
+              </p>
+              <button onClick={() => setPage("community")}>Open Notes</button>
+            </div>
+          ) : (
+            <p>No upcoming meeting yet.</p>
+          )}
+        </section>
+      )}
+
+      {page === "library" && (
+        <section className="card">
+          <h2>Library</h2>
+
+          <div className="tabs">
+            <button onClick={() => setLibraryPage("suggestions")}>
+              Book Suggestions
+            </button>
+            <button onClick={() => setLibraryPage("archive")}>Archive</button>
+          </div>
+
+          {libraryPage === "suggestions" && (
+            <>
+              {meetings[0] && (
+                <div className="item">
+                  <h3>Current Book</h3>
+                  <strong>{meetings[0].book_title}</strong>
+                  <p>by {meetings[0].author}</p>
+                </div>
+              )}
+
+              <div className="item">
+                <h3>Top 3 Favourites in the Current Vote</h3>
+                {topThreeBooks().length === 0 && (
+                  <p className="small">No votes yet.</p>
+                )}
+                {topThreeBooks().map((b, index) => (
+                  <p key={b.id}>
+                    {index + 1}. {b.title} — {voteCount(b.id)} votes
+                  </p>
+                ))}
+              </div>
+
+              <h3>Suggest a Book</h3>
+
+              <input
+                placeholder="Book title"
+                value={bookTitle}
+                onChange={(e) => setBookTitle(e.target.value)}
+              />
+
+              <input
+                placeholder="Author"
+                value={bookAuthor}
+                onChange={(e) => setBookAuthor(e.target.value)}
+              />
+
+              <textarea
+                placeholder="Why should the book club read it?"
+                value={whyRead}
+                onChange={(e) => setWhyRead(e.target.value)}
+              />
+
+              <button onClick={addBook}>Add book suggestion</button>
+
+              <h3>Current Suggestions</h3>
+
+              {books.map((b) => (
+                <div className="item" key={b.id}>
+                  <strong>{b.title}</strong>
+                  <p>by {b.author}</p>
+                  <small>{b.why_read}</small>
+                  <p>{voteCount(b.id)} votes</p>
+
+                  <button onClick={() => vote(b.id)}>
+                    {userVoted(b.id) ? "Remove vote" : "Vote"}
+                  </button>
+
+                  {isAdmin && (
+                    <button onClick={() => selectAsNextBook(b)}>
+                      Select as next book
+                    </button>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+
+          {libraryPage === "archive" && (
+            <>
+              <h3>Archive</h3>
+
+              {archiveMeetings.map((m) => (
+                <div className="item" key={m.id}>
+                  <strong>{m.book_title}</strong>
+                  <p>by {m.author}</p>
+                  <p>{m.meeting_date}</p>
+                  <p>Average rating: {averageRating(m.id)}</p>
+
+                  <div className="star-row">
+                    <p>Rate this book:</p>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button key={star} onClick={() => rateBook(m.id, star)}>
+                        {myRating(m.id)?.rating >= star ? "★" : "☆"}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button onClick={() => setSelectedArchive(m)}>
+                    View discussion
+                  </button>
+                </div>
+              ))}
+            </>
+          )}
+        </section>
+      )}
+
+      {page === "community" && (
+        <section className="card">
+          <h2>Community</h2>
+
+          <div className="tabs">
+            <button onClick={() => setCommunityPage("notes")}>Notes</button>
+            <button onClick={() => setCommunityPage("ideas")}>
+              Ideas & Feedback
+            </button>
+            {isAdmin && (
+              <button onClick={() => setCommunityPage("admin")}>Admin</button>
+            )}
+          </div>
+
+          {communityPage === "notes" && (
+            <>
+              <h3>Current Read Notes</h3>
+
+              {meetings[0] && (
+                <p className="small">
+                  Current read: {meetings[0].book_title} by {meetings[0].author}
+                </p>
+              )}
+
+              <p className="small">
+                {notesUnlocked()
+                  ? "✨ Book club notes unlocked. Everyone can now see all notes."
+                  : "Your notes are private until 24 hours before the meeting."}
+              </p>
+
+              <select value={noteType} onChange={(e) => setNoteType(e.target.value)}>
+                <option>Question</option>
+                <option>Theory</option>
+                <option>Favourite Moment</option>
+                <option>Other</option>
+              </select>
+
+              <textarea
+                placeholder="Write your chaotic thoughts..."
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+
+              <button onClick={addNote}>Add note</button>
+
+              <h3>Meeting Pack</h3>
+
+              {Object.entries(groupedNotes(visibleNotesForCurrentMeeting())).map(
+                ([type, items]) => (
+                  <div key={type}>
+                    <h4 className="category-title">{type}</h4>
+                    {items.length === 0 && <p className="small">No notes yet.</p>}
+                    {items.map((n) => (
+                      <div className="item" key={n.id}>
+                        <span className="member-tag">
+                          <img
+                            src={membersMap[n.member_name] || AVATARS[0]}
+                            alt={n.member_name}
+                            className="avatar-tiny"
+                          />
+                          <strong>{n.member_name}</strong>
+                        </span>
+                        <p>{n.note_text}</p>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+            </>
+          )}
+
+          {communityPage === "ideas" && (
+            <>
+              <h3>Ideas & Feedback</h3>
+
+              <select
+                value={feedbackType}
+                onChange={(e) => setFeedbackType(e.target.value)}
+              >
+                <option>App idea</option>
+                <option>Book club idea</option>
+              </select>
+
+              <textarea
+                placeholder="Share your idea or feedback..."
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+              />
+
+              <button onClick={addFeedback}>Submit feedback</button>
+
+              {isAdmin && (
+                <>
+                  <h3>Admin View: Submitted Ideas</h3>
+                  {feedback.map((f) => (
+                    <div className="item" key={f.id}>
+                      <strong>{f.feedback_type}</strong>
+                      <p>{f.feedback_text}</p>
+                      <span className="member-tag">
+                        <img
+                          src={membersMap[f.member_name] || AVATARS[0]}
+                          alt={f.member_name}
+                          className="avatar-tiny"
+                        />
+                        <small>From {f.member_name}</small>
+                      </span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </>
+          )}
+
+          {communityPage === "admin" && isAdmin && (
+            <>
+              <h3>Admin</h3>
+
+              <input
+                type="date"
+                value={newMeetingDate}
+                onChange={(e) => setNewMeetingDate(e.target.value)}
+              />
+
+              <input
+                type="time"
+                value={newMeetingTime}
+                onChange={(e) => setNewMeetingTime(e.target.value)}
+              />
+
+              <input
+                placeholder="Book title"
+                value={newMeetingBook}
+                onChange={(e) => setNewMeetingBook(e.target.value)}
+              />
+
+              <input
+                placeholder="Author"
+                value={newMeetingAuthor}
+                onChange={(e) => setNewMeetingAuthor(e.target.value)}
+              />
+
+              <button onClick={addMeeting}>Add meeting</button>
+            </>
+          )}
+        </section>
+      )}
+
+      {selectedArchive && (
+        <div className="modal">
+          <div className="modal-content">
+            <button onClick={() => setSelectedArchive(null)}>Close</button>
+
+            <h2>{selectedArchive.book_title}</h2>
+            <p>by {selectedArchive.author}</p>
+            <p>{selectedArchive.meeting_date}</p>
+
+            <h3>Ratings</h3>
+            {ratingsForMeeting(selectedArchive.id).length === 0 && (
+              <p className="small">No ratings yet.</p>
+            )}
+            {ratingsForMeeting(selectedArchive.id).map((r) => (
+              <p key={r.id}>
+                <span className="member-tag">
+                  <img
+                    src={membersMap[r.member_name] || AVATARS[0]}
+                    alt={r.member_name}
+                    className="avatar-tiny"
+                  />
+                  <strong>{r.member_name}</strong>: {r.rating} ⭐
+                </span>
+              </p>
+            ))}
+
+            <h3>Notes</h3>
+            {Object.entries(groupedNotes(notesForMeeting(selectedArchive.id))).map(
+              ([type, items]) => (
+                <div key={type}>
+                  <h4 className="category-title">{type}</h4>
+                  {items.length === 0 && <p className="small">No notes yet.</p>}
+                  {items.map((n) => (
+                    <div className="item" key={n.id}>
+                      <span className="member-tag">
+                        <img
+                          src={membersMap[n.member_name] || AVATARS[0]}
+                          alt={n.member_name}
+                          className="avatar-tiny"
+                        />
+                        <strong>{n.member_name}</strong>
+                      </span>
+                      <p>{n.note_text}</p>
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+
+            <h3>More Books Like This</h3>
+
+            {similarForMeeting(selectedArchive.id).map((b) => (
+              <div className="item" key={b.id}>
+                <strong>{b.title}</strong>
+                <p>by {b.author}</p>
+                <small>
+                  Recommended by {b.recommended_by}: {b.reason}
+                </small>
+              </div>
+            ))}
+
+            <input
+              placeholder="Book title"
+              value={similarTitle}
+              onChange={(e) => setSimilarTitle(e.target.value)}
+            />
+
+            <input
+              placeholder="Author"
+              value={similarAuthor}
+              onChange={(e) => setSimilarAuthor(e.target.value)}
+            />
+
+            <textarea
+              placeholder="Why does this remind you of this book?"
+              value={similarReason}
+              onChange={(e) => setSimilarReason(e.target.value)}
+            />
+
+            <button onClick={() => addSimilarBook(selectedArchive.id)}>
+              Add similar book
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="topnav">
+        <button
+          className={`navbtn ${page === "home" ? "active" : ""}`}
+          onClick={() => setPage("home")}
+        >
+          <span className="nav-icon">🏰</span>
+          <span className="nav-label">Home</span>
+        </button>
+        <button
+          className={`navbtn ${page === "library" ? "active" : ""}`}
+          onClick={() => setPage("library")}
+        >
+          <span className="nav-icon">📚</span>
+          <span className="nav-label">Library</span>
+        </button>
+        <button
+          className={`navbtn ${page === "community" ? "active" : ""}`}
+          onClick={() => setPage("community")}
+        >
+          <span className="nav-icon">🌙</span>
+          <span className="nav-label">Community</span>
+        </button>
+      </div>
+    </div>
+  );
+}
