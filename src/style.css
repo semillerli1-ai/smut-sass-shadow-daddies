@@ -205,12 +205,13 @@ button {
   border-radius: 999px;
   padding: 0.9rem 1rem;
   font-weight: 700;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Cinzel', sans-serif;
   background: #f9c5d5;
   color: #111;
   cursor: pointer;
   transition: opacity 0.2s, transform 0.1s;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
 }
 
 button:hover {
@@ -220,12 +221,6 @@ button:hover {
 
 button:active {
   transform: translateY(0);
-}
-
-.whatsapp {
-  background: #25D366;
-  color: white;
-  margin-bottom: 1rem;
 }
 
 input,
@@ -272,6 +267,58 @@ textarea {
   margin-top: 2rem;
   border-top: 1px solid rgba(249,197,213,0.15);
   padding-top: 1rem;
+}
+
+.archive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.discussion-btn {
+  background: transparent;
+  border: 1px solid rgba(249, 197, 213, 0.4);
+  color: #f9c5d5;
+  font-size: 0.7rem;
+  padding: 0.4rem 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.star-section {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(249, 197, 213, 0.1);
+}
+
+.star-label {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+  margin: 0 0 0.5rem 0;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+}
+
+.star-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.star-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.6rem;
+  color: #f9c5d5;
+  padding: 0;
+  min-width: unset;
+  line-height: 1;
+}
+
+.star-btn:hover {
+  transform: scale(1.2);
 }
 
 .meeting-pack {
@@ -551,4 +598,162 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.5rem 0;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(249, 197, 213, 0.2);
+  background: #1a1a1a;
+  color: white;
+  font-size: 1rem;
+  font-family: 'Lato', sans-serif;
+  transition: border-color 0.2s;
+}
+
+.modal-content h2 {
+  font-family: 'Pinyon Script', cursive;
+  font-size: 2.5rem;
+  color: #f9c5d5;
+  margin-bottom: 0.25rem;
+}
+
+.modal-content h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(249, 197, 213, 0.6);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(249, 197, 213, 0.15);
+}
+
+.modal-content h4 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(249, 197, 213, 0.5);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.modal-content .item {
+  background: #141414;
+  border: 1px solid rgba(249, 197, 213, 0.08);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  margin-top: 0.75rem;
+  position: relative;
+}
+
+.modal-content .item p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
+}
+
+.modal-content .member-tag {
+  margin-bottom: 0.5rem;
+}
+
+.modal-content .member-tag strong {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: #f9c5d5;
+}
+
+.modal-content .avatar-tiny {
+  width: 32px;
+  height: 32px;
+}
+
+.modal-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-meta p {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+  font-style: italic;
+}
+
+.rating-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(249, 197, 213, 0.1);
+  border: 1px solid rgba(249, 197, 213, 0.2);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  color: #f9c5d5;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+}
+
+vote-count {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(249, 197, 213, 0.1);
+  border: 1px solid rgba(249, 197, 213, 0.25);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.85rem;
+  color: #f9c5d5;
+  font-family: 'Cinzel', serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.voters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.75rem;
+  align-items: center;
+  min-height: 1rem;
+}
+
+.voter-tag img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(249, 197, 213, 0.3);
+  object-fit: cover;
+}
+
+.book-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.book-actions button {
+  flex: 1;
+  font-size: 0.75rem;
+  padding: 0.6rem 0.75rem;
+}
+
+.cover-top {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 0.75rem;
+  display: block;
 }

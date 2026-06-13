@@ -19,6 +19,11 @@ export default function App() {
     `https://jepinzaptcydbczofaup.supabase.co/storage/v1/object/public/avatar/avatar${i + 1}.png`
   );
 
+  function getBookCover(title, author) {
+    const query = encodeURIComponent(`${title} ${author}`);
+    return `https://covers.openlibrary.org/b/olid/$(query)-M.jpg`;
+  }
+
   const [page, setPage] = useState("home");
   const [libraryPage, setLibraryPage] = useState("suggestions");
   const [communityPage, setCommunityPage] = useState("notes");
@@ -317,6 +322,11 @@ export default function App() {
     loadMeetings();
   }
 
+  function getBookCover(title) {
+    const query = encodeURIComponent(title);
+    return `https://covers.openlibrary.org/b/title/${query}-M.jpg?default=false`;
+  }
+
   function voteCount(bookId) {
     return votes.filter((v) => v.suggestion_id === bookId).length;
   }
@@ -475,31 +485,6 @@ export default function App() {
           value={adminCode}
           onChange={(e) => setAdminCode(e.target.value)}
         />
-{/* 
-        {!localStorage.getItem("avatar") && (
-          <>
-            <p style={{ margin: "0.5rem 0 0.25rem", color: "#f9c5d5", fontFamily: "'Cinzel', serif", fontSize: "0.85rem", letterSpacing: "0.05em" }}>
-              Choose your avatar
-            </p>
-            <div className="avatar-grid">
-              {AVATARS.map((url) => (
-                <button
-                  key={url}
-                  className={`avatar-btn ${avatar === url ? "selected" : ""}`}
-                  onClick={() => setAvatar(url)}
-                  type="button"
-                  style={{ padding: 0, background: "transparent", border: "none", width: "100%" }}
-                >
-                  <img
-                    src={url}
-                    alt="avatar"
-                    className={`avatar-img ${avatar === url ? "selected" : ""}`}
-                  />
-                </button>
-              ))}
-            </div>
-          </>
-        )} */}
 
         <p style={{ margin: "0.5rem 0 0.25rem", color: "#f9c5d5", fontFamily: "'Cinzel', serif", fontSize: "0.85rem", letterSpacing: "0.05em" }}>
           Choose your avatar
@@ -581,7 +566,7 @@ export default function App() {
               <p>
                 {meetings[0].meeting_date} at {meetings[0].meeting_time}
               </p>
-              <button onClick={() => setPage("community")}>Open Notes</button>
+              <button onClick={() => { setPage("community"); setCommunityPage("notes"); }}>Open Notes</button>
             </div>
           ) : (
             <p>No upcoming meeting yet.</p>
@@ -679,20 +664,49 @@ export default function App() {
 
               {books.map((b) => (
                 <div className="item" key={b.id}>
-                  <strong>{b.title}</strong>
-                  <p>by {b.author}</p>
-                  <small>{b.why_read}</small>
-                  <p>{voteCount(b.id)} votes</p>
+                  <img
+                    src={getBookCover(b.title)}
+                    alt={b.title}
+                    className="cover-top"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(b.title)}`
+                    }}
+                  />
+                  <div className="archive-header" style={{ marginTop: "0.75rem" }}>
+                    <div>
+                      <strong>{b.title}</strong>
+                      <p>by {b.author}</p>
+                    </div>
+                    <span className="vote-count">{voteCount(b.id)} ♥</span>
+                  </div>
 
-                  <button onClick={() => vote(b.id)}>
-                    {userVoted(b.id) ? "Remove vote" : "Vote"}
-                  </button>
+                  <p className="small">{b.why_read}</p>
 
-                  {isAdmin && (
-                    <button onClick={() => selectAsNextBook(b)}>
-                      Select as next book
+                  <span className="member-tag" style={{ marginTop: "0.5rem" }}>
+                    <img
+                      src={membersMap[b.suggested_by] || AVATARS[0]}
+                      alt={b.suggested_by}
+                      className="avatar-tiny"
+                    />
+                    <small style={{ color: "rgba(249,197,213,0.6)", fontFamily: "'Cinzel', serif", fontSize: "0.7rem", letterSpacing: "0.05em" }}>
+                      Suggested by {b.suggested_by}
+                    </small>
+                  </span>
+
+                  <div className="book-actions">
+                    <button
+                      className={userVoted(b.id) ? "secondary" : ""}
+                      onClick={() => vote(b.id)}
+                    >
+                      {userVoted(b.id) ? "♥ Remove vote" : "♡ Vote"}
                     </button>
-                  )}
+                    {isAdmin && (
+                      <button className="secondary" onClick={() => selectAsNextBook(b)}>
+                        Select as next book
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </>
@@ -704,23 +718,36 @@ export default function App() {
 
               {archiveMeetings.map((m) => (
                 <div className="item" key={m.id}>
-                  <strong>{m.book_title}</strong>
-                  <p>by {m.author}</p>
-                  <p>{m.meeting_date}</p>
-                  <p>Average rating: {averageRating(m.id)}</p>
-
-                  <div className="star-row">
-                    <p>Rate this book:</p>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button key={star} onClick={() => rateBook(m.id, star)}>
-                        {myRating(m.id)?.rating >= star ? "★" : "☆"}
-                      </button>
-                    ))}
+                  <img
+                    src={getBookCover(m.book_title)}
+                    alt={m.book_title}
+                    className="cover-top"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(m.book_title)}`
+                    }}
+                  />
+                  <div className="archive-header" style={{ marginTop: "0.75rem" }}>
+                    <div>
+                      <strong>{m.book_title}</strong>
+                      <p>by {m.author}</p>
+                      <p className="small">{m.meeting_date}</p>
+                    </div>
+                    <button className="discussion-btn" onClick={() => setSelectedArchive(m)}>
+                      💬 Discussion
+                    </button>
                   </div>
-
-                  <button onClick={() => setSelectedArchive(m)}>
-                    View discussion
-                  </button>
+                  <p className="small">Average rating: {averageRating(m.id)}</p>
+                  <div className="star-section">
+                    <p className="star-label">Rate this book:</p>
+                    <div className="star-row">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} className="star-btn" onClick={() => rateBook(m.id, star)}>
+                          {myRating(m.id)?.rating >= star ? "★" : "☆"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ))}
             </>
@@ -896,25 +923,31 @@ export default function App() {
             <button onClick={() => setSelectedArchive(null)}>Close</button>
 
             <h2>{selectedArchive.book_title}</h2>
-            <p>by {selectedArchive.author}</p>
-            <p>{selectedArchive.meeting_date}</p>
+            <div className="modal-meta">
+              <p>by {selectedArchive.author}</p>
+              <p>✦</p>
+              <p>{selectedArchive.meeting_date}</p>
+            </div>
 
             <h3>Ratings</h3>
             {ratingsForMeeting(selectedArchive.id).length === 0 && (
               <p className="small">No ratings yet.</p>
             )}
-            {ratingsForMeeting(selectedArchive.id).map((r) => (
-              <p key={r.id}>
-                <span className="member-tag">
-                  <img
-                    src={membersMap[r.member_name] || AVATARS[0]}
-                    alt={r.member_name}
-                    className="avatar-tiny"
-                  />
-                  <strong>{r.member_name}</strong>: {r.rating} ⭐
-                </span>
-              </p>
-            ))}
+            <div className="ratings-list">
+              {ratingsForMeeting(selectedArchive.id).map((r) => (
+                <div key={r.id} className="item">
+                  <span className="member-tag">
+                    <img
+                      src={membersMap[r.member_name] || AVATARS[0]}
+                      alt={r.member_name}
+                      className="avatar-tiny"
+                    />
+                    <strong>{r.member_name}</strong>
+                    <span className="rating-tag">{r.rating} ★</span>
+                  </span>
+                </div>
+              ))}
+            </div>
 
             <h3>Notes</h3>
             {Object.entries(groupedNotes(notesForMeeting(selectedArchive.id))).map(
@@ -943,11 +976,29 @@ export default function App() {
 
             {similarForMeeting(selectedArchive.id).map((b) => (
               <div className="item" key={b.id}>
-                <strong>{b.title}</strong>
-                <p>by {b.author}</p>
-                <small>
-                  Recommended by {b.recommended_by}: {b.reason}
-                </small>
+                <img
+                  src={getBookCover(b.title)}
+                  alt={b.title}
+                  className="cover-top"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(b.title)}`
+                  }}
+                />
+                <div style={{ marginTop: "0.75rem" }}>
+                  <strong>{b.title}</strong>
+                  <p>by {b.author}</p>
+                  <span className="member-tag" style={{ marginTop: "0.5rem" }}>
+                    <img
+                      src={membersMap[b.recommended_by] || AVATARS[0]}
+                      alt={b.recommended_by}
+                      className="avatar-tiny"
+                    />
+                    <small style={{ color: "rgba(249,197,213,0.6)", fontFamily: "'Cinzel', serif", fontSize: "0.7rem", letterSpacing: "0.05em" }}>
+                      Recommended by {b.recommended_by}: {b.reason}
+                    </small>
+                  </span>
+                </div>
               </div>
             ))}
 
@@ -979,21 +1030,31 @@ export default function App() {
       <div className="topnav">
         <button
           className={`navbtn ${page === "home" ? "active" : ""}`}
-          onClick={() => setPage("home")}
+          onClick={() => {
+            setPage("home");
+            setSelectedArchive(null);
+            setLibraryPage("suggestions");
+          }}
         >
           <span className="nav-icon">🏰</span>
           <span className="nav-label">Home</span>
         </button>
         <button
           className={`navbtn ${page === "library" ? "active" : ""}`}
-          onClick={() => setPage("library")}
+          onClick={() => {
+            setPage("library");
+            setSelectedArchive(null);
+          }}
         >
           <span className="nav-icon">📚</span>
           <span className="nav-label">Library</span>
         </button>
         <button
           className={`navbtn ${page === "community" ? "active" : ""}`}
-          onClick={() => setPage("community")}
+          onClick={() => {
+            setPage("community");
+            setSelectedArchive(null);
+          }}
         >
           <span className="nav-icon">🌙</span>
           <span className="nav-label">Community</span>
