@@ -160,7 +160,6 @@ export default function App() {
   }
 
   async function enterApp() {
-    console.log("enterApp called", { clubCode, memberName, avatar });
     if (clubCode === CLUB_CODE && memberName.trim() && avatar) {
       await supabase.from("members").upsert(
         { member_name: memberName, avatar_url: avatar },
@@ -417,7 +416,41 @@ export default function App() {
   if (!access) {
     return (
       <div className="clubgate">
-        <h1 style={{ fontFamily: "'Metamorphous', cursive" }}>Smut, Sass and Shadow Daddies</h1>
+        <div className="title-wrap">
+          <svg className="rose-deco" viewBox="0 0 300 60" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.7">
+              <circle cx="150" cy="30" r="8" fill="none" stroke="#f9c5d5" strokeWidth="1" />
+              <circle cx="150" cy="30" r="4" fill="#f9c5d5" opacity="0.6" />
+              <path d="M100 30 Q120 20 138 30 Q120 40 100 30Z" fill="#f9c5d5" opacity="0.5" />
+              <path d="M200 30 Q180 20 162 30 Q180 40 200 30Z" fill="#f9c5d5" opacity="0.5" />
+              <path d="M80 30 Q95 25 108 30 Q95 35 80 30Z" fill="#f9c5d5" opacity="0.3" />
+              <path d="M220 30 Q205 25 192 30 Q205 35 220 30Z" fill="#f9c5d5" opacity="0.3" />
+              <circle cx="125" cy="22" r="3" fill="#f9c5d5" opacity="0.4" />
+              <circle cx="175" cy="22" r="3" fill="#f9c5d5" opacity="0.4" />
+              <circle cx="125" cy="38" r="3" fill="#f9c5d5" opacity="0.4" />
+              <circle cx="175" cy="38" r="3" fill="#f9c5d5" opacity="0.4" />
+              <line x1="60" y1="30" x2="88" y2="30" stroke="#f9c5d5" strokeWidth="0.5" opacity="0.4" />
+              <line x1="212" y1="30" x2="240" y2="30" stroke="#f9c5d5" strokeWidth="0.5" opacity="0.4" />
+            </g>
+          </svg>
+          <h1>Smut, Sass and Shadow Daddies</h1>
+          <svg className="rose-deco rose-bottom" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.6">
+              <circle cx="150" cy="20" r="10" fill="none" stroke="#f9c5d5" strokeWidth="1" />
+              <circle cx="150" cy="20" r="5" fill="#f9c5d5" opacity="0.5" />
+              <path d="M130 20 Q138 12 148 20 Q138 28 130 20Z" fill="#f9c5d5" opacity="0.6" />
+              <path d="M170 20 Q162 12 152 20 Q162 28 170 20Z" fill="#f9c5d5" opacity="0.6" />
+              <path d="M150 0 Q158 8 150 18 Q142 8 150 0Z" fill="#f9c5d5" opacity="0.6" />
+              <path d="M150 40 Q158 32 150 22 Q142 32 150 40Z" fill="#f9c5d5" opacity="0.4" />
+              <circle cx="130" cy="40" r="4" fill="#f9c5d5" opacity="0.3" />
+              <circle cx="170" cy="40" r="4" fill="#f9c5d5" opacity="0.3" />
+              <path d="M100 55 Q125 45 148 50" fill="none" stroke="#f9c5d5" strokeWidth="0.8" opacity="0.4" />
+              <path d="M152 50 Q175 45 200 55" fill="none" stroke="#f9c5d5" strokeWidth="0.8" opacity="0.4" />
+              <circle cx="100" cy="55" r="3" fill="#f9c5d5" opacity="0.3" />
+              <circle cx="200" cy="55" r="3" fill="#f9c5d5" opacity="0.3" />
+            </g>
+          </svg>
+        </div>
 
         <p className="intro">
           Where FMCs make catastrophically questionable decisions — and we
@@ -496,7 +529,43 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1 style={{ fontFamily: "'Metamorphous', cursive" }}>Smut, Sass and Shadow Daddies</h1>
+
+      <div className="title-wrap">
+        <svg className="rose-deco" viewBox="0 0 300 60" xmlns="http://www.w3.org/2000/svg">
+          <g opacity="0.7">
+            <circle cx="150" cy="30" r="8" fill="none" stroke="#f9c5d5" strokeWidth="1" />
+            <circle cx="150" cy="30" r="4" fill="#f9c5d5" opacity="0.6" />
+            <path d="M100 30 Q120 20 138 30 Q120 40 100 30Z" fill="#f9c5d5" opacity="0.5" />
+            <path d="M200 30 Q180 20 162 30 Q180 40 200 30Z" fill="#f9c5d5" opacity="0.5" />
+            <path d="M80 30 Q95 25 108 30 Q95 35 80 30Z" fill="#f9c5d5" opacity="0.3" />
+            <path d="M220 30 Q205 25 192 30 Q205 35 220 30Z" fill="#f9c5d5" opacity="0.3" />
+            <circle cx="125" cy="22" r="3" fill="#f9c5d5" opacity="0.4" />
+            <circle cx="175" cy="22" r="3" fill="#f9c5d5" opacity="0.4" />
+            <circle cx="125" cy="38" r="3" fill="#f9c5d5" opacity="0.4" />
+            <circle cx="175" cy="38" r="3" fill="#f9c5d5" opacity="0.4" />
+            <line x1="60" y1="30" x2="88" y2="30" stroke="#f9c5d5" strokeWidth="0.5" opacity="0.4" />
+            <line x1="212" y1="30" x2="240" y2="30" stroke="#f9c5d5" strokeWidth="0.5" opacity="0.4" />
+          </g>
+        </svg>
+        <h1>Smut, Sass and Shadow Daddies</h1>
+        <svg className="rose-deco rose-bottom" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+          <g opacity="0.6">
+            <circle cx="150" cy="20" r="10" fill="none" stroke="#f9c5d5" strokeWidth="1" />
+            <circle cx="150" cy="20" r="5" fill="#f9c5d5" opacity="0.5" />
+            <path d="M130 20 Q138 12 148 20 Q138 28 130 20Z" fill="#f9c5d5" opacity="0.6" />
+            <path d="M170 20 Q162 12 152 20 Q162 28 170 20Z" fill="#f9c5d5" opacity="0.6" />
+            <path d="M150 0 Q158 8 150 18 Q142 8 150 0Z" fill="#f9c5d5" opacity="0.6" />
+            <path d="M150 40 Q158 32 150 22 Q142 32 150 40Z" fill="#f9c5d5" opacity="0.4" />
+            <circle cx="130" cy="40" r="4" fill="#f9c5d5" opacity="0.3" />
+            <circle cx="170" cy="40" r="4" fill="#f9c5d5" opacity="0.3" />
+            <path d="M100 55 Q125 45 148 50" fill="none" stroke="#f9c5d5" strokeWidth="0.8" opacity="0.4" />
+            <path d="M152 50 Q175 45 200 55" fill="none" stroke="#f9c5d5" strokeWidth="0.8" opacity="0.4" />
+            <circle cx="100" cy="55" r="3" fill="#f9c5d5" opacity="0.3" />
+            <circle cx="200" cy="55" r="3" fill="#f9c5d5" opacity="0.3" />
+          </g>
+        </svg>
+      </div>
+
       <button className="logout-btn" onClick={logout}>✦ logout</button>
 
       <p className="intro">Welcome back, {memberName} ✨</p>
@@ -548,10 +617,18 @@ export default function App() {
           <h2>Library</h2>
 
           <div className="tabs">
-            <button onClick={() => setLibraryPage("suggestions")}>
-              Book Suggestions
+            <button
+              className={`tab-btn ${libraryPage === "suggestions" ? "tab-active" : ""}`}
+              onClick={() => setLibraryPage("suggestions")}
+            >
+              📖 Book Suggestions
             </button>
-            <button onClick={() => setLibraryPage("archive")}>Archive</button>
+            <button
+              className={`tab-btn ${libraryPage === "archive" ? "tab-active" : ""}`}
+              onClick={() => setLibraryPage("archive")}
+            >
+              🏛️ Archive
+            </button>
           </div>
 
           {libraryPage === "suggestions" && (
@@ -656,14 +733,29 @@ export default function App() {
           <h2>Community</h2>
 
           <div className="tabs">
-            <button onClick={() => setCommunityPage("notes")}>Notes</button>
-            <button onClick={() => setCommunityPage("ideas")}>
-              Ideas & Feedback
+            <button
+              className={`tab-btn ${communityPage === "notes" ? "tab-active" : ""}`}
+              onClick={() => setCommunityPage("notes")}
+            >
+              📝 Notes
+            </button>
+            <button
+              className={`tab-btn ${communityPage === "ideas" ? "tab-active" : ""}`}
+              onClick={() => setCommunityPage("ideas")}
+            >
+              💡 Ideas & Feedback
             </button>
             {isAdmin && (
-              <button onClick={() => setCommunityPage("admin")}>Admin</button>
+              <button
+                className={`tab-btn ${communityPage === "admin" ? "tab-active" : ""}`}
+                onClick={() => setCommunityPage("admin")}
+              >
+                ⚙️ Admin
+              </button>
             )}
           </div>
+
+          <div className="tabs tabs-community"></div>
 
           {communityPage === "notes" && (
             <>
