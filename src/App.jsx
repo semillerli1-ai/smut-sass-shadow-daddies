@@ -475,7 +475,7 @@ export default function App() {
           value={adminCode}
           onChange={(e) => setAdminCode(e.target.value)}
         />
-
+{/* 
         {!localStorage.getItem("avatar") && (
           <>
             <p style={{ margin: "0.5rem 0 0.25rem", color: "#f9c5d5", fontFamily: "'Cinzel', serif", fontSize: "0.85rem", letterSpacing: "0.05em" }}>
@@ -499,7 +499,7 @@ export default function App() {
               ))}
             </div>
           </>
-        )}
+        )} */}
 
         <p style={{ margin: "0.5rem 0 0.25rem", color: "#f9c5d5", fontFamily: "'Cinzel', serif", fontSize: "0.85rem", letterSpacing: "0.05em" }}>
           Choose your avatar
