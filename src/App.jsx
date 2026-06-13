@@ -558,24 +558,39 @@ export default function App() {
       {page === "home" && (
         <section className="card">
           <h2>Next Meeting</h2>
-
           {meetings[0] ? (
-            <div className="item">
-              <strong>{meetings[0].book_title}</strong>
-              <p>by {meetings[0].author}</p>
-              <p>
-                {meetings[0].meeting_date} at {meetings[0].meeting_time}
-              </p>
-              <button onClick={() => { setPage("community"); setCommunityPage("notes"); }}>Open Notes</button>
+            <div className="meeting-card">
+              <img
+                src={getBookCover(meetings[0].book_title)}
+                alt={meetings[0].book_title}
+                className="meeting-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(meetings[0].book_title)}`
+                }}
+              />
+              <div className="meeting-info">
+                <p className="meeting-label">✦ Currently Reading</p>
+                <h3 style={{ fontFamily: "'Pinyon Script', cursive", fontSize: "2rem", color: "white", margin: "0.25rem 0" }}>
+                  {meetings[0].book_title}
+                </h3>
+                <p className="meeting-author">by {meetings[0].author}</p>
+                <div className="meeting-date-row">
+                  <span className="meeting-pill">📅 {meetings[0].meeting_date}</span>
+                  <span className="meeting-pill">🕯️ {meetings[0].meeting_time}</span>
+                </div>
+                <button onClick={() => { setPage("community"); setCommunityPage("notes"); }}>
+                  Open Notes
+                </button>
+              </div>
             </div>
           ) : (
-            <p>No upcoming meeting yet.</p>
+            <p className="small">No upcoming meeting yet.</p>
           )}
           <div className="share-wrap">
             <button className="share-trigger" onClick={() => setShowShare(!showShare)}>
               🔗 Share this app
             </button>
-
             {showShare && (
               <div className="share-bubble">
                 <p className="share-label">Copy the link</p>
