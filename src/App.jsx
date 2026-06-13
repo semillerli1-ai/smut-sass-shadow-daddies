@@ -13,6 +13,7 @@ export default function App() {
   const [clubCode, setClubCode] = useState("");
   const [adminCode, setAdminCode] = useState("");
   const [memberName, setMemberName] = useState("");
+  const [attendance, setAttendance] = useState([]);
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false)
   const AVATARS = Array.from({ length: 8 }, (_, i) =>
@@ -83,6 +84,7 @@ export default function App() {
     loadRatings();
     loadSimilarBooks();
     loadFeedback();
+    loadAttendance();
   }
 
   async function loadMembers() {
@@ -162,6 +164,37 @@ export default function App() {
       .order("created_at", { ascending: false });
 
     if (data) setFeedback(data);
+  }
+
+  async function loadAttendance() {
+    const { data } = await supabase.from("attendance").select("*");
+    if (data) setAttendance(data);
+  }
+
+  async function toggleAttendance(meetingId) {
+    const existing = attendance.find(
+      a => a.meeting_id === meetingId && a.member_name === memberName
+    );
+
+    if (existing) {
+      await supabase.from("attendance").delete().eq("id", existing.id);
+    } else {
+      await supabase.from("attendance").insert({
+        meeting_id: meetingId,
+        member_name: memberName
+      });
+    }
+    loadAttendance();
+  }
+
+  function isAttending(meetingId) {
+    return attendance.find(
+      a => a.meeting_id === meetingId && a.member_name === memberName
+    );
+  }
+
+  function attendeesForMeeting(meetingId) {
+    return attendance.filter(a => a.meeting_id === meetingId);
   }
 
   async function enterApp() {
@@ -578,6 +611,30 @@ export default function App() {
                 <div className="meeting-date-row">
                   <span className="meeting-pill">📅 {meetings[0].meeting_date}</span>
                   <span className="meeting-pill">🕯️ {meetings[0].meeting_time}</span>
+                </div>
+                <div className="attendance-section">
+                  <p className="meeting-label">✦ Who's coming</p>
+                  <div className="attendees-row">
+                    {attendeesForMeeting(meetings[0].id).length === 0 && (
+                      <p className="small">No one yet — be the first!</p>
+                    )}
+                    {attendeesForMeeting(meetings[0].id).map(a => (
+                      <span key={a.id} className="attendee-tag">
+                        <img
+                          src={membersMap[a.member_name] || AVATARS[0]}
+                          alt={a.member_name}
+                          className="avatar-tiny"
+                        />
+                        <span className="attendee-name">{a.member_name}</span>
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    className={isAttending(meetings[0].id) ? "secondary" : ""}
+                    onClick={() => toggleAttendance(meetings[0].id)}
+                  >
+                    {isAttending(meetings[0].id) ? "✦ I can't make it" : "✦ I'm attending!"}
+                  </button>
                 </div>
                 <button onClick={() => { setPage("community"); setCommunityPage("notes"); }}>
                   Open Notes
