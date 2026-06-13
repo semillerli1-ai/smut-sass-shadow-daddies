@@ -363,3 +363,118 @@ textarea {
   gap: 0.5rem;
   margin-bottom: 0.25rem;
 }
+
+.logout-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: transparent;
+  color: #f9c5d5;
+  font-size: 0.75rem;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid rgba(249, 197, 213, 0.5);
+  border-radius: 999px;
+}
+
+.logout-btn:hover {
+  background: rgba(249, 197, 213, 0.1);
+  border-color: #f9c5d5;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 2rem 2rem 6rem 2rem;
+  position: relative;
+}
+
+.share-wrap {
+  position: relative;
+  margin-top: 1rem;
+}
+
+.share-trigger {
+  background: transparent;
+  border: 1px solid rgba(249, 197, 213, 0.3);
+  color: #f9c5d5;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  padding: 0.6rem 1.2rem;
+}
+
+.share-trigger:hover {
+  background: rgba(249, 197, 213, 0.08);
+}
+
+.share-bubble {
+  position: absolute;
+  bottom: 110%;
+  left: 0;
+  right: 0;
+  background: #1a1a2e;
+  border: 1px solid rgba(249, 197, 213, 0.25);
+  border-radius: 1.2rem;
+  padding: 1rem;
+  z-index: 10;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+}
+
+.share-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 2rem;
+  border: 8px solid transparent;
+  border-top-color: rgba(249, 197, 213, 0.25);
+}
+
+.share-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  color: rgba(249, 197, 213, 0.6);
+  letter-spacing: 0.08em;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+}
+
+.share-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #111;
+  border: 1px solid rgba(249, 197, 213, 0.15);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.share-url {
+  flex: 1;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-btn {
+  background: #f9c5d5;
+  color: #111;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.whatsapp {
+  width: 100%;
+  background: #25D366;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
