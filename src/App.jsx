@@ -14,6 +14,7 @@ export default function App() {
   const [adminCode, setAdminCode] = useState("");
   const [memberName, setMemberName] = useState("");
   const [attendance, setAttendance] = useState([]);
+  const [currentBookInfo, setCurrentBookInfo] = useState(null);
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false)
   const AVATARS = Array.from({ length: 8 }, (_, i) =>
@@ -118,6 +119,10 @@ export default function App() {
 
     setMeetings(upcoming.slice(0, 3));
     setArchiveMeetings(archived);
+
+    if (upcoming[0]) {
+      fetchBookInfo(upcoming[0].book_title, upcoming[0].author);
+    }
   }
 
   async function loadBooks() {
@@ -127,6 +132,25 @@ export default function App() {
       .order("created_at", { ascending: false });
 
     if (data) setBooks(data);
+  }
+
+  async function fetchBookInfo(title, author) {
+    try {
+      const query = encodeURIComponent(`${title} ${author}`);
+      const res = await fetch(`https://openlibrary.org/search.json?q=${query}&limit=1`);
+      const data = await res.json();
+      if (data.docs && data.docs[0]) {
+        const book = data.docs[0];
+        setCurrentBookInfo({
+          pages: book.number_of_pages_median,
+          year: book.first_publish_year,
+          genres: book.subject?.slice(0, 3),
+          description: book.first_sentence?.value
+        });
+      }
+    } catch (e) {
+      console.log("Could not fetch book info");
+    }
   }
 
   async function loadVotes() {
@@ -711,22 +735,62 @@ export default function App() {
           {libraryPage === "suggestions" && (
             <>
               {meetings[0] && (
-                <div className="item">
-                  <h3>Current Book</h3>
-                  <strong>{meetings[0].book_title}</strong>
-                  <p>by {meetings[0].author}</p>
+                <div className="current-book-card">
+                  <div className="current-book-layout">
+                    <img
+                      src={getBookCover(meetings[0].book_title)}
+                      alt={meetings[0].book_title}
+                      className="current-book-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(meetings[0].book_title)}`
+                      }}
+                    />
+                    <div className="current-book-info">
+                      <p className="meeting-label">✦ Currently Reading</p>
+                      <strong>{meetings[0].book_title}</strong>
+                      <p className="meeting-author">by {meetings[0].author}</p>
+                      {currentBookInfo && (
+                        <div className="book-meta">
+                          {currentBookInfo.year && (
+                            <span className="meeting-pill">📅 {currentBookInfo.year}</span>
+                          )}
+                          {currentBookInfo.pages && (
+                            <span className="meeting-pill">📖 {currentBookInfo.pages} pages</span>
+                          )}
+                        </div>
+                      )}
+                      {currentBookInfo?.description && (
+                        <p className="book-description">"{currentBookInfo.description}"</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
               <div className="item">
-                <h3>Top 3 Favourites in the Current Vote</h3>
+                <h3>✦ Top 3 in the Current Vote</h3>
                 {topThreeBooks().length === 0 && (
                   <p className="small">No votes yet.</p>
                 )}
                 {topThreeBooks().map((b, index) => (
-                  <p key={b.id}>
-                    {index + 1}. {b.title} — {voteCount(b.id)} votes
-                  </p>
+                  <div key={b.id} className="top3-row">
+                    <span className="top3-rank">{index + 1}</span>
+                    <img
+                      src={getBookCover(b.title)}
+                      alt={b.title}
+                      className="top3-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(b.title)}`
+                      }}
+                    />
+                    <div className="top3-info">
+                      <strong>{b.title}</strong>
+                      <p className="small">by {b.author}</p>
+                    </div>
+                    <span className="vote-count">{voteCount(b.id)} ♥</span>
+                  </div>
                 ))}
               </div>
 
@@ -845,71 +909,208 @@ export default function App() {
             </>
           )}
         </section>
-      )}
+      )
+      }
 
-      {page === "community" && (
-        <section className="card">
-          <h2>Community</h2>
+      {
+        page === "community" && (
+          <section className="card">
+            <h2>Community</h2>
 
-          <div className="tabs">
-            <button
-              className={`tab-btn ${communityPage === "notes" ? "tab-active" : ""}`}
-              onClick={() => setCommunityPage("notes")}
-            >
-              📝 Notes
-            </button>
-            <button
-              className={`tab-btn ${communityPage === "ideas" ? "tab-active" : ""}`}
-              onClick={() => setCommunityPage("ideas")}
-            >
-              💡 Ideas & Feedback
-            </button>
-            {isAdmin && (
+            <div className="tabs">
               <button
-                className={`tab-btn ${communityPage === "admin" ? "tab-active" : ""}`}
-                onClick={() => setCommunityPage("admin")}
+                className={`tab-btn ${communityPage === "notes" ? "tab-active" : ""}`}
+                onClick={() => setCommunityPage("notes")}
               >
-                ⚙️ Admin
+                📝 Notes
               </button>
-            )}
-          </div>
-
-          <div className="tabs tabs-community"></div>
-
-          {communityPage === "notes" && (
-            <>
-              <h3>Current Read Notes</h3>
-
-              {meetings[0] && (
-                <p className="small">
-                  Current read: {meetings[0].book_title} by {meetings[0].author}
-                </p>
+              <button
+                className={`tab-btn ${communityPage === "ideas" ? "tab-active" : ""}`}
+                onClick={() => setCommunityPage("ideas")}
+              >
+                💡 Ideas & Feedback
+              </button>
+              {isAdmin && (
+                <button
+                  className={`tab-btn ${communityPage === "admin" ? "tab-active" : ""}`}
+                  onClick={() => setCommunityPage("admin")}
+                >
+                  ⚙️ Admin
+                </button>
               )}
+            </div>
 
-              <p className="small">
-                {notesUnlocked()
-                  ? "✨ Book club notes unlocked. Everyone can now see all notes."
-                  : "Your notes are private until 24 hours before the meeting."}
-              </p>
+            <div className="tabs tabs-community"></div>
 
-              <select value={noteType} onChange={(e) => setNoteType(e.target.value)}>
-                <option>Question</option>
-                <option>Theory</option>
-                <option>Favourite Moment</option>
-                <option>Other</option>
-              </select>
+            {communityPage === "notes" && (
+              <>
+                <h3>Current Read Notes</h3>
 
-              <textarea
-                placeholder="Write your chaotic thoughts..."
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
+                {meetings[0] && (
+                  <p className="small">
+                    Current read: {meetings[0].book_title} by {meetings[0].author}
+                  </p>
+                )}
 
-              <button onClick={addNote}>Add note</button>
+                <p className="small">
+                  {notesUnlocked()
+                    ? "✨ Book club notes unlocked. Everyone can now see all notes."
+                    : "Your notes are private until 24 hours before the meeting."}
+                </p>
 
-              <h3>Meeting Pack</h3>
+                <select value={noteType} onChange={(e) => setNoteType(e.target.value)}>
+                  <option>Question</option>
+                  <option>Theory</option>
+                  <option>Favourite Moment</option>
+                  <option>Other</option>
+                </select>
 
-              {Object.entries(groupedNotes(visibleNotesForCurrentMeeting())).map(
+                <textarea
+                  placeholder="Write your chaotic thoughts..."
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+
+                <button onClick={addNote}>Add note</button>
+
+                <h3>Meeting Pack</h3>
+
+                {Object.entries(groupedNotes(visibleNotesForCurrentMeeting())).map(
+                  ([type, items]) => (
+                    <div key={type}>
+                      <h4 className="category-title">{type}</h4>
+                      {items.length === 0 && <p className="small">No notes yet.</p>}
+                      {items.map((n) => (
+                        <div className="item" key={n.id}>
+                          <span className="member-tag">
+                            <img
+                              src={membersMap[n.member_name] || AVATARS[0]}
+                              alt={n.member_name}
+                              className="avatar-tiny"
+                            />
+                            <strong>{n.member_name}</strong>
+                          </span>
+                          <p>{n.note_text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                )}
+              </>
+            )}
+
+            {communityPage === "ideas" && (
+              <>
+                <h3>Ideas & Feedback</h3>
+
+                <select
+                  value={feedbackType}
+                  onChange={(e) => setFeedbackType(e.target.value)}
+                >
+                  <option>App idea</option>
+                  <option>Book club idea</option>
+                </select>
+
+                <textarea
+                  placeholder="Share your idea or feedback..."
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                />
+
+                <button onClick={addFeedback}>Submit feedback</button>
+
+                {isAdmin && (
+                  <>
+                    <h3>Admin View: Submitted Ideas</h3>
+                    {feedback.map((f) => (
+                      <div className="item" key={f.id}>
+                        <strong>{f.feedback_type}</strong>
+                        <p>{f.feedback_text}</p>
+                        <span className="member-tag">
+                          <img
+                            src={membersMap[f.member_name] || AVATARS[0]}
+                            alt={f.member_name}
+                            className="avatar-tiny"
+                          />
+                          <small>From {f.member_name}</small>
+                        </span>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </>
+            )}
+
+            {communityPage === "admin" && isAdmin && (
+              <>
+                <h3>Admin</h3>
+
+                <input
+                  type="date"
+                  value={newMeetingDate}
+                  onChange={(e) => setNewMeetingDate(e.target.value)}
+                />
+
+                <input
+                  type="time"
+                  value={newMeetingTime}
+                  onChange={(e) => setNewMeetingTime(e.target.value)}
+                />
+
+                <input
+                  placeholder="Book title"
+                  value={newMeetingBook}
+                  onChange={(e) => setNewMeetingBook(e.target.value)}
+                />
+
+                <input
+                  placeholder="Author"
+                  value={newMeetingAuthor}
+                  onChange={(e) => setNewMeetingAuthor(e.target.value)}
+                />
+
+                <button onClick={addMeeting}>Add meeting</button>
+              </>
+            )}
+          </section>
+        )
+      }
+
+      {
+        selectedArchive && (
+          <div className="modal">
+            <div className="modal-content">
+              <button onClick={() => setSelectedArchive(null)}>Close</button>
+
+              <h2>{selectedArchive.book_title}</h2>
+              <div className="modal-meta">
+                <p>by {selectedArchive.author}</p>
+                <p>✦</p>
+                <p>{selectedArchive.meeting_date}</p>
+              </div>
+
+              <h3>Ratings</h3>
+              {ratingsForMeeting(selectedArchive.id).length === 0 && (
+                <p className="small">No ratings yet.</p>
+              )}
+              <div className="ratings-list">
+                {ratingsForMeeting(selectedArchive.id).map((r) => (
+                  <div key={r.id} className="item">
+                    <span className="member-tag">
+                      <img
+                        src={membersMap[r.member_name] || AVATARS[0]}
+                        alt={r.member_name}
+                        className="avatar-tiny"
+                      />
+                      <strong>{r.member_name}</strong>
+                      <span className="rating-tag">{r.rating} ★</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <h3>Notes</h3>
+              {Object.entries(groupedNotes(notesForMeeting(selectedArchive.id))).map(
                 ([type, items]) => (
                   <div key={type}>
                     <h4 className="category-title">{type}</h4>
@@ -930,194 +1131,62 @@ export default function App() {
                   </div>
                 )
               )}
-            </>
-          )}
 
-          {communityPage === "ideas" && (
-            <>
-              <h3>Ideas & Feedback</h3>
+              <h3>More Books Like This</h3>
 
-              <select
-                value={feedbackType}
-                onChange={(e) => setFeedbackType(e.target.value)}
-              >
-                <option>App idea</option>
-                <option>Book club idea</option>
-              </select>
-
-              <textarea
-                placeholder="Share your idea or feedback..."
-                value={feedbackText}
-                onChange={(e) => setFeedbackText(e.target.value)}
-              />
-
-              <button onClick={addFeedback}>Submit feedback</button>
-
-              {isAdmin && (
-                <>
-                  <h3>Admin View: Submitted Ideas</h3>
-                  {feedback.map((f) => (
-                    <div className="item" key={f.id}>
-                      <strong>{f.feedback_type}</strong>
-                      <p>{f.feedback_text}</p>
-                      <span className="member-tag">
-                        <img
-                          src={membersMap[f.member_name] || AVATARS[0]}
-                          alt={f.member_name}
-                          className="avatar-tiny"
-                        />
-                        <small>From {f.member_name}</small>
-                      </span>
-                    </div>
-                  ))}
-                </>
-              )}
-            </>
-          )}
-
-          {communityPage === "admin" && isAdmin && (
-            <>
-              <h3>Admin</h3>
-
-              <input
-                type="date"
-                value={newMeetingDate}
-                onChange={(e) => setNewMeetingDate(e.target.value)}
-              />
-
-              <input
-                type="time"
-                value={newMeetingTime}
-                onChange={(e) => setNewMeetingTime(e.target.value)}
-              />
+              {similarForMeeting(selectedArchive.id).map((b) => (
+                <div className="item" key={b.id}>
+                  <img
+                    src={getBookCover(b.title)}
+                    alt={b.title}
+                    className="cover-top"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(b.title)}`
+                    }}
+                  />
+                  <div style={{ marginTop: "0.75rem" }}>
+                    <strong>{b.title}</strong>
+                    <p>by {b.author}</p>
+                    <span className="member-tag" style={{ marginTop: "0.5rem" }}>
+                      <img
+                        src={membersMap[b.recommended_by] || AVATARS[0]}
+                        alt={b.recommended_by}
+                        className="avatar-tiny"
+                      />
+                      <small style={{ color: "rgba(249,197,213,0.6)", fontFamily: "'Cinzel', serif", fontSize: "0.7rem", letterSpacing: "0.05em" }}>
+                        Recommended by {b.recommended_by}: {b.reason}
+                      </small>
+                    </span>
+                  </div>
+                </div>
+              ))}
 
               <input
                 placeholder="Book title"
-                value={newMeetingBook}
-                onChange={(e) => setNewMeetingBook(e.target.value)}
+                value={similarTitle}
+                onChange={(e) => setSimilarTitle(e.target.value)}
               />
 
               <input
                 placeholder="Author"
-                value={newMeetingAuthor}
-                onChange={(e) => setNewMeetingAuthor(e.target.value)}
+                value={similarAuthor}
+                onChange={(e) => setSimilarAuthor(e.target.value)}
               />
 
-              <button onClick={addMeeting}>Add meeting</button>
-            </>
-          )}
-        </section>
-      )}
+              <textarea
+                placeholder="Why does this remind you of this book?"
+                value={similarReason}
+                onChange={(e) => setSimilarReason(e.target.value)}
+              />
 
-      {selectedArchive && (
-        <div className="modal">
-          <div className="modal-content">
-            <button onClick={() => setSelectedArchive(null)}>Close</button>
-
-            <h2>{selectedArchive.book_title}</h2>
-            <div className="modal-meta">
-              <p>by {selectedArchive.author}</p>
-              <p>✦</p>
-              <p>{selectedArchive.meeting_date}</p>
+              <button onClick={() => addSimilarBook(selectedArchive.id)}>
+                Add similar book
+              </button>
             </div>
-
-            <h3>Ratings</h3>
-            {ratingsForMeeting(selectedArchive.id).length === 0 && (
-              <p className="small">No ratings yet.</p>
-            )}
-            <div className="ratings-list">
-              {ratingsForMeeting(selectedArchive.id).map((r) => (
-                <div key={r.id} className="item">
-                  <span className="member-tag">
-                    <img
-                      src={membersMap[r.member_name] || AVATARS[0]}
-                      alt={r.member_name}
-                      className="avatar-tiny"
-                    />
-                    <strong>{r.member_name}</strong>
-                    <span className="rating-tag">{r.rating} ★</span>
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <h3>Notes</h3>
-            {Object.entries(groupedNotes(notesForMeeting(selectedArchive.id))).map(
-              ([type, items]) => (
-                <div key={type}>
-                  <h4 className="category-title">{type}</h4>
-                  {items.length === 0 && <p className="small">No notes yet.</p>}
-                  {items.map((n) => (
-                    <div className="item" key={n.id}>
-                      <span className="member-tag">
-                        <img
-                          src={membersMap[n.member_name] || AVATARS[0]}
-                          alt={n.member_name}
-                          className="avatar-tiny"
-                        />
-                        <strong>{n.member_name}</strong>
-                      </span>
-                      <p>{n.note_text}</p>
-                    </div>
-                  ))}
-                </div>
-              )
-            )}
-
-            <h3>More Books Like This</h3>
-
-            {similarForMeeting(selectedArchive.id).map((b) => (
-              <div className="item" key={b.id}>
-                <img
-                  src={getBookCover(b.title)}
-                  alt={b.title}
-                  className="cover-top"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(b.title)}`
-                  }}
-                />
-                <div style={{ marginTop: "0.75rem" }}>
-                  <strong>{b.title}</strong>
-                  <p>by {b.author}</p>
-                  <span className="member-tag" style={{ marginTop: "0.5rem" }}>
-                    <img
-                      src={membersMap[b.recommended_by] || AVATARS[0]}
-                      alt={b.recommended_by}
-                      className="avatar-tiny"
-                    />
-                    <small style={{ color: "rgba(249,197,213,0.6)", fontFamily: "'Cinzel', serif", fontSize: "0.7rem", letterSpacing: "0.05em" }}>
-                      Recommended by {b.recommended_by}: {b.reason}
-                    </small>
-                  </span>
-                </div>
-              </div>
-            ))}
-
-            <input
-              placeholder="Book title"
-              value={similarTitle}
-              onChange={(e) => setSimilarTitle(e.target.value)}
-            />
-
-            <input
-              placeholder="Author"
-              value={similarAuthor}
-              onChange={(e) => setSimilarAuthor(e.target.value)}
-            />
-
-            <textarea
-              placeholder="Why does this remind you of this book?"
-              value={similarReason}
-              onChange={(e) => setSimilarReason(e.target.value)}
-            />
-
-            <button onClick={() => addSimilarBook(selectedArchive.id)}>
-              Add similar book
-            </button>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <div className="topnav">
         <button
@@ -1152,6 +1221,6 @@ export default function App() {
           <span className="nav-label">Community</span>
         </button>
       </div>
-    </div>
+    </div >
   );
 }
