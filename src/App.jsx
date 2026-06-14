@@ -14,6 +14,8 @@ export default function App() {
   const [adminCode, setAdminCode] = useState("");
   const [memberName, setMemberName] = useState("");
   const [attendance, setAttendance] = useState([]);
+  const [bookSuggestions, setBookSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentBookInfo, setCurrentBookInfo] = useState(null);
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false)
@@ -150,6 +152,27 @@ export default function App() {
       }
     } catch (e) {
       console.log("Could not fetch book info");
+    }
+  }
+
+  async function searchBooks(query) {
+    if (query.length < 3) {
+      setBookSuggestions([]);
+      return;
+    }
+    try {
+      const res = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=5&fields=title,author_name,cover_i`);
+      const data = await res.json();
+      if (data.docs) {
+        setBookSuggestions(data.docs.map(b => ({
+          title: b.title,
+          author: b.author_name?.[0] || "Unknown author",
+          cover: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-S.jpg` : null
+        })));
+        setShowSuggestions(true);
+      }
+    } catch (e) {
+      console.log("Search failed", e);
     }
   }
 
@@ -753,7 +776,7 @@ export default function App() {
                       {currentBookInfo && (
                         <div className="book-meta">
                           {currentBookInfo.year && (
-                            <span className="meeting-pill">📅 {currentBookInfo.year}</span>
+                            <span className="meeting-pill">✦ {currentBookInfo.year} edition</span>
                           )}
                           {currentBookInfo.pages && (
                             <span className="meeting-pill">📖 {currentBookInfo.pages} pages</span>
@@ -796,11 +819,40 @@ export default function App() {
 
               <h3>Suggest a Book</h3>
 
-              <input
-                placeholder="Book title"
-                value={bookTitle}
-                onChange={(e) => setBookTitle(e.target.value)}
-              />
+              <div style={{ position: "relative" }}>
+                <input
+                  placeholder="Search book title..."
+                  value={bookTitle}
+                  onChange={(e) => {
+                    setBookTitle(e.target.value);
+                    searchBooks(e.target.value);
+                  }}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                />
+                {showSuggestions && bookSuggestions.length > 0 && (
+                  <div className="book-dropdown">
+                    {bookSuggestions.map((b, i) => (
+                      <div
+                        key={i}
+                        className="book-dropdown-item"
+                        onMouseDown={() => {
+                          setBookTitle(b.title);
+                          setBookAuthor(b.author);
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        {b.cover && (
+                          <img src={b.cover} alt={b.title} className="dropdown-cover" />
+                        )}
+                        <div>
+                          <p className="dropdown-title">{b.title}</p>
+                          <p className="dropdown-author">by {b.author}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <input
                 placeholder="Author"

@@ -810,11 +810,12 @@ vote-count {
   background: rgba(249, 197, 213, 0.1);
   border: 1px solid rgba(249, 197, 213, 0.2);
   border-radius: 999px;
-  padding: 0.3rem 0.75rem;
-  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
   color: #f9c5d5;
   font-family: 'Cinzel', serif;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .attendance-section {
@@ -1003,4 +1004,58 @@ vote-count {
 
 .top3-info strong {
   font-size: 0.9rem;
+}
+
+.book-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #1a1a2e;
+  border: 1px solid rgba(249, 197, 213, 0.25);
+  border-radius: 1rem;
+  z-index: 20;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  margin-top: 0.25rem;
+}
+
+.book-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(249, 197, 213, 0.08);
+  transition: background 0.15s;
+}
+
+.book-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.book-dropdown-item:hover {
+  background: rgba(249, 197, 213, 0.08);
+}
+
+.dropdown-cover {
+  width: 32px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+
+.dropdown-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+}
+
+.dropdown-author {
+  font-size: 0.75rem;
+  color: rgba(249, 197, 213, 0.6);
+  margin: 0.1rem 0 0 0;
+  font-style: italic;
 }
