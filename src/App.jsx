@@ -618,7 +618,7 @@ export default function App() {
                     {attendeesForMeeting(meetings[0].id).length === 0 && (
                       <p className="small">No one yet — be the first!</p>
                     )}
-                    {attendeesForMeeting(meetings[0].id).map(a => (
+                    {attendeesForMeeting(meetings[0].id).slice(0, 3).map(a => (
                       <span key={a.id} className="attendee-tag">
                         <img
                           src={membersMap[a.member_name] || AVATARS[0]}
@@ -628,8 +628,28 @@ export default function App() {
                         <span className="attendee-name">{a.member_name}</span>
                       </span>
                     ))}
+                    {attendeesForMeeting(meetings[0].id).length > 3 && (
+                      <div className="attendees-overflow">
+                        <span className="overflow-count">
+                          +{attendeesForMeeting(meetings[0].id).length - 3}
+                        </span>
+                        <div className="overflow-tooltip">
+                          {attendeesForMeeting(meetings[0].id).slice(3).map(a => (
+                            <span key={a.id} className="overflow-member">
+                              <img
+                                src={membersMap[a.member_name] || AVATARS[0]}
+                                alt={a.member_name}
+                                className="avatar-tiny"
+                              />
+                              <span>{a.member_name}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <button
+                    style={{ marginLeft: "0", width: "75%" }}
                     className={isAttending(meetings[0].id) ? "secondary" : ""}
                     onClick={() => toggleAttendance(meetings[0].id)}
                   >
