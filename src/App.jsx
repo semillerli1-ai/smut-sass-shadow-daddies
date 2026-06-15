@@ -385,7 +385,7 @@ export default function App() {
   }
 
   async function toggleFeedbackComplete(id, current) {
-    await supabase
+    const result = await supabase
       .from("app_feedback")
       .update({ completed: !current })
       .eq("id", id);
