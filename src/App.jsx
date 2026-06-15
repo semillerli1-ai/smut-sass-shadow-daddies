@@ -17,6 +17,8 @@ export default function App() {
   const [bookSuggestions, setBookSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentBookInfo, setCurrentBookInfo] = useState(null);
+  const [bookDescriptions, setBookDescriptions] = useState({});
+  const [expandedBooks, setExpandedBooks] = useState({});
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false)
   const AVATARS = Array.from({ length: 8 }, (_, i) =>
@@ -133,7 +135,14 @@ export default function App() {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (data) setBooks(data);
+    if (data) {
+      setBooks(data);
+      data.forEach(b => {
+        if (!b.why_read) {
+          fetchBookDescription(b.id, b.title, b.author);
+        }
+      });
+    }
   }
 
   async function fetchBookInfo(title, author) {
@@ -153,6 +162,32 @@ export default function App() {
     } catch (e) {
       console.log("Could not fetch book info");
     }
+  }
+
+  async function fetchBookDescription(bookId, title, author) {
+    if (bookDescriptions[bookId]) return;
+    try {
+      const query = encodeURIComponent(`${title} ${author}`);
+      const res = await fetch(`https://openlibrary.org/search.json?q=${query}&limit=1&fields=key`);
+      const data = await res.json();
+      if (data.docs?.[0]?.key) {
+        const workRes = await fetch(`https://openlibrary.org${data.docs[0].key}.json`);
+        const workData = await workRes.json();
+        const desc = typeof workData.description === 'string'
+          ? workData.description
+          : workData.description?.value || null;
+        if (desc) {
+          setBookDescriptions(prev => ({ ...prev, [bookId]: desc }));
+        }
+      }
+    } catch (e) {
+      console.log("Could not fetch description", e);
+    }
+  }
+
+  function truncate(text, length = 200) {
+    if (!text) return "";
+    return text.length > length ? text.slice(0, length) + "..." : text;
   }
 
   async function searchBooks(query) {
@@ -897,7 +932,27 @@ export default function App() {
                     <span className="vote-count">{voteCount(b.id)} ♥</span>
                   </div>
 
-                  <p className="small">{b.why_read}</p>
+                  {(b.why_read || bookDescriptions[b.id]) && (
+                    <p
+                      className="small"
+                      style={{ cursor: (b.why_read || bookDescriptions[b.id] || "").length > 200 ? "pointer" : "default" }}
+                      onClick={() => setExpandedBooks(prev => ({ ...prev, [b.id]: !prev[b.id] }))}
+                    >
+                      {expandedBooks[b.id]
+                        ? (b.why_read || bookDescriptions[b.id])
+                        : truncate(b.why_read || bookDescriptions[b.id])}
+                      {!expandedBooks[b.id] && (b.why_read || bookDescriptions[b.id] || "").length > 200 && (
+                        <span style={{ color: "#f9c5d5", fontFamily: "'Cinzel', serif", fontSize: "0.7rem", marginLeft: "0.3rem" }}>
+                          read more
+                        </span>
+                      )}
+                      {expandedBooks[b.id] && (
+                        <span style={{ color: "#f9c5d5", fontFamily: "'Cinzel', serif", fontSize: "0.7rem", marginLeft: "0.3rem" }}>
+                          show less
+                        </span>
+                      )}
+                    </p>
+                  )}
 
                   <span className="member-tag" style={{ marginTop: "0.5rem" }}>
                     <img
