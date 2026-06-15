@@ -924,40 +924,42 @@ export default function App() {
             <>
               <h3>Archive</h3>
 
-              {archiveMeetings.map((m) => (
-                <div className="item" key={m.id}>
-                  <img
-                    src={getBookCover(m.book_title)}
-                    alt={m.book_title}
-                    className="cover-top"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(m.book_title)}`
-                    }}
-                  />
-                  <div className="archive-header" style={{ marginTop: "0.75rem" }}>
-                    <div>
-                      <strong>{m.book_title}</strong>
-                      <p>by {m.author}</p>
-                      <p className="small">{m.meeting_date}</p>
+              {archiveMeetings
+                .sort((a, b) => new Date(b.meeting_date).getTime() - new Date(a.meeting_date).getTime())
+                .map((m) => (
+                  <div className="item" key={m.id}>
+                    <img
+                      src={getBookCover(m.book_title)}
+                      alt={m.book_title}
+                      className="cover-top"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(m.book_title)}`
+                      }}
+                    />
+                    <div className="archive-header" style={{ marginTop: "0.75rem" }}>
+                      <div>
+                        <strong>{m.book_title}</strong>
+                        <p>by {m.author}</p>
+                        <p className="small">{m.meeting_date}</p>
+                      </div>
+                      <button className="discussion-btn" onClick={() => setSelectedArchive(m)}>
+                        💬 Discussion
+                      </button>
                     </div>
-                    <button className="discussion-btn" onClick={() => setSelectedArchive(m)}>
-                      💬 Discussion
-                    </button>
-                  </div>
-                  <p className="small">Average rating: {averageRating(m.id)}</p>
-                  <div className="star-section">
-                    <p className="star-label">Rate this book:</p>
-                    <div className="star-row">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button key={star} className="star-btn" onClick={() => rateBook(m.id, star)}>
-                          {myRating(m.id)?.rating >= star ? "★" : "☆"}
-                        </button>
-                      ))}
+                    <p className="small">Average rating: {averageRating(m.id)}</p>
+                    <div className="star-section">
+                      <p className="star-label">Rate this book:</p>
+                      <div className="star-row">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button key={star} className="star-btn" onClick={() => rateBook(m.id, star)}>
+                            {myRating(m.id)?.rating >= star ? "★" : "☆"}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </>
           )}
         </section>
