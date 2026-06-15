@@ -873,7 +873,7 @@ export default function App() {
               {books.map((b) => (
                 <div className="item" key={b.id}>
                   <img
-                    src={getBookCover(b.title)}
+                    src={b.cover_url || getBookCover(b.title)}
                     alt={b.title}
                     className="cover-top"
                     onError={(e) => {
