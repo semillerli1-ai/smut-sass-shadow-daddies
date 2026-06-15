@@ -384,6 +384,14 @@ export default function App() {
     loadFeedback();
   }
 
+  async function toggleFeedbackComplete(id, current) {
+    await supabase
+      .from("app_feedback")
+      .update({ completed: !current })
+      .eq("id", id);
+    loadFeedback();
+  }
+
   async function addMeeting() {
     if (!newMeetingDate || !newMeetingTime || !newMeetingBook) return;
 
@@ -1075,21 +1083,68 @@ export default function App() {
 
                 {isAdmin && (
                   <>
-                    <h3>Admin View: Submitted Ideas</h3>
-                    {feedback.map((f) => (
-                      <div className="item" key={f.id}>
-                        <strong>{f.feedback_type}</strong>
-                        <p>{f.feedback_text}</p>
-                        <span className="member-tag">
+                    <h3>Submitted Ideas</h3>
+
+                    {feedback.filter(f => !f.completed).length === 0 && (
+                      <p className="small">No open ideas yet.</p>
+                    )}
+
+                    {feedback.filter(f => !f.completed).map((f) => (
+                      <div className="feedback-item" key={f.id}>
+                        <div className="feedback-header">
+                          <span className="feedback-type-tag">{f.feedback_type}</span>
+                          <button
+                            className="complete-btn"
+                            onClick={() => toggleFeedbackComplete(f.id, f.completed)}
+                            title="Mark as completed"
+                          >
+                            ✓
+                          </button>
+                        </div>
+                        <p className="feedback-text">{f.feedback_text}</p>
+                        <span className="member-tag" style={{ marginTop: "0.5rem" }}>
                           <img
                             src={membersMap[f.member_name] || AVATARS[0]}
                             alt={f.member_name}
                             className="avatar-tiny"
                           />
-                          <small>From {f.member_name}</small>
+                          <small style={{ color: "rgba(249,197,213,0.6)", fontFamily: "'Cinzel', serif", fontSize: "0.7rem", letterSpacing: "0.05em" }}>
+                            From {f.member_name}
+                          </small>
                         </span>
                       </div>
                     ))}
+
+                    {feedback.filter(f => f.completed).length > 0 && (
+                      <>
+                        <h3 style={{ marginTop: "2rem" }}>✦ Completed Ideas</h3>
+                        {feedback.filter(f => f.completed).map((f) => (
+                          <div className="feedback-item completed" key={f.id}>
+                            <div className="feedback-header">
+                              <span className="feedback-type-tag">{f.feedback_type}</span>
+                              <button
+                                className="uncomplete-btn"
+                                onClick={() => toggleFeedbackComplete(f.id, f.completed)}
+                                title="Mark as open"
+                              >
+                                ↩
+                              </button>
+                            </div>
+                            <p className="feedback-text">{f.feedback_text}</p>
+                            <span className="member-tag" style={{ marginTop: "0.5rem" }}>
+                              <img
+                                src={membersMap[f.member_name] || AVATARS[0]}
+                                alt={f.member_name}
+                                className="avatar-tiny"
+                              />
+                              <small style={{ color: "rgba(249,197,213,0.4)", fontFamily: "'Cinzel', serif", fontSize: "0.7rem", letterSpacing: "0.05em" }}>
+                                From {f.member_name}
+                              </small>
+                            </span>
+                          </div>
+                        ))}
+                      </>
+                    )}
                   </>
                 )}
               </>
