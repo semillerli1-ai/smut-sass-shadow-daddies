@@ -941,7 +941,7 @@ export default function App() {
                       <div>
                         <strong>{m.book_title}</strong>
                         <p>by {m.author}</p>
-                        <p className="small">{m.meeting_date}</p>
+                        <span className="meeting-pill">⌛ {m.meeting_date}</span>
                       </div>
                       <button className="discussion-btn" onClick={() => setSelectedArchive(m)}>
                         💬 Discussion
