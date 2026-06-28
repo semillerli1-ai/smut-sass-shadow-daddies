@@ -19,23 +19,24 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(1px 1px at 10% 15%, rgba(249,197,213,0.6) 0%, transparent 100%),
-    radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 40% 10%, rgba(249,197,213,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 55% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 65% 25%, rgba(249,197,213,0.5) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 75% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 85% 45%, rgba(249,197,213,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 15% 85%, rgba(249,197,213,0.3) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 50% 90%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 33% 70%, rgba(249,197,213,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 5%, rgba(255,255,255,0.6) 0%, transparent 100%);
+    radial-gradient(1px 1px at 10% 15%, rgba(249, 197, 213, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 40%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 10%, rgba(249, 197, 213, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 60%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 25%, rgba(249, 197, 213, 0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 75% 80%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 45%, rgba(249, 197, 213, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 70%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 85%, rgba(249, 197, 213, 0.3) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 50% 90%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 33% 70%, rgba(249, 197, 213, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 5%, rgba(255, 255, 255, 0.6) 0%, transparent 100%);
   pointer-events: none;
   z-index: 0;
 }
 
-.app, .clubgate {
+.app,
+.clubgate {
   position: relative;
   z-index: 1;
 }
@@ -113,8 +114,8 @@ h4 {
   background: #111;
   padding: 2.5rem 2rem;
   border-radius: 1.5rem;
-  border: 1px solid rgba(249,197,213,0.25);
-  box-shadow: 0 0 60px rgba(249,197,213,0.05), inset 0 0 40px rgba(249,197,213,0.02);
+  border: 1px solid rgba(249, 197, 213, 0.25);
+  box-shadow: 0 0 60px rgba(249, 197, 213, 0.05), inset 0 0 40px rgba(249, 197, 213, 0.02);
   position: relative;
   overflow: hidden;
 }
@@ -124,7 +125,7 @@ h4 {
   position: absolute;
   top: 1rem;
   right: 1.5rem;
-  color: rgba(249,197,213,0.3);
+  color: rgba(249, 197, 213, 0.3);
   font-size: 1.2rem;
 }
 
@@ -133,7 +134,7 @@ h4 {
   position: absolute;
   bottom: 1rem;
   left: 1.5rem;
-  color: rgba(249,197,213,0.2);
+  color: rgba(249, 197, 213, 0.2);
   font-size: 0.8rem;
 }
 
@@ -148,7 +149,7 @@ h4 {
   padding: 1.5rem;
   border-radius: 1.5rem;
   margin-top: 1.5rem;
-  border: 1px solid rgba(249,197,213,0.12);
+  border: 1px solid rgba(249, 197, 213, 0.12);
   position: relative;
 }
 
@@ -157,7 +158,7 @@ h4 {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  color: rgba(249,197,213,0.15);
+  color: rgba(249, 197, 213, 0.15);
   font-size: 0.7rem;
 }
 
@@ -230,7 +231,7 @@ select {
   margin: 0.5rem 0;
   padding: 1rem;
   border-radius: 1rem;
-  border: 1px solid rgba(249,197,213,0.2);
+  border: 1px solid rgba(249, 197, 213, 0.2);
   background: #1a1a1a;
   color: white;
   font-size: 1rem;
@@ -242,7 +243,7 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: rgba(249,197,213,0.5);
+  border-color: rgba(249, 197, 213, 0.5);
 }
 
 textarea {
@@ -254,7 +255,7 @@ textarea {
   padding: 1rem;
   border-radius: 1rem;
   margin-top: 1rem;
-  border: 1px solid rgba(249,197,213,0.08);
+  border: 1px solid rgba(249, 197, 213, 0.08);
 }
 
 .small {
@@ -265,7 +266,7 @@ textarea {
 
 .archive {
   margin-top: 2rem;
-  border-top: 1px solid rgba(249,197,213,0.15);
+  border-top: 1px solid rgba(249, 197, 213, 0.15);
   padding-top: 1rem;
 }
 
@@ -295,7 +296,7 @@ textarea {
 
 .star-label {
   font-size: 0.8rem;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   margin: 0 0 0.5rem 0;
   font-family: 'Cinzel', serif;
   letter-spacing: 0.05em;
@@ -323,7 +324,7 @@ textarea {
 
 .meeting-pack {
   background: #141014;
-  border: 1px solid rgba(249,197,213,0.3);
+  border: 1px solid rgba(249, 197, 213, 0.3);
   border-radius: 1.5rem;
   padding: 1rem;
   margin-top: 1rem;
@@ -346,7 +347,7 @@ textarea {
 .secondary {
   background: #2a2028;
   color: #f9c5d5;
-  border: 1px solid rgba(249,197,213,0.4);
+  border: 1px solid rgba(249, 197, 213, 0.4);
   margin-left: 0.5rem;
   margin-top: 0.5rem;
 }
@@ -539,7 +540,7 @@ textarea {
   border-radius: 1.2rem;
   padding: 1rem;
   z-index: 10;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
 .share-bubble::after {
@@ -574,7 +575,7 @@ textarea {
 .share-url {
   flex: 1;
   font-size: 0.75rem;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -686,7 +687,7 @@ select {
 
 .modal-meta p {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255, 255, 255, 0.4);
   margin: 0;
   font-style: italic;
 }
@@ -793,7 +794,7 @@ vote-count {
 }
 
 .meeting-author {
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   font-style: italic;
   font-size: 0.9rem;
   margin: 0 0 1rem 0;
@@ -887,7 +888,7 @@ vote-count {
   padding: 0.75rem;
   z-index: 20;
   min-width: 160px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   flex-direction: column;
   gap: 0.5rem;
 }
@@ -959,7 +960,7 @@ vote-count {
 
 .book-description {
   font-size: 0.8rem;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255, 255, 255, 0.45);
   font-style: italic;
   line-height: 1.5;
   margin-top: 0.5rem;
@@ -1016,7 +1017,7 @@ vote-count {
   border-radius: 1rem;
   z-index: 20;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   margin-top: 0.25rem;
 }
 
@@ -1095,7 +1096,7 @@ vote-count {
 
 .feedback-text {
   font-size: 0.9rem;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.6;
   margin: 0.25rem 0;
 }
@@ -1124,8 +1125,8 @@ vote-count {
 
 .uncomplete-btn {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -1142,4 +1143,290 @@ vote-count {
 .uncomplete-btn:hover {
   border-color: rgba(249, 197, 213, 0.3);
   color: #f9c5d5;
+}
+
+.media-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(249, 197, 213, 0.1);
+}
+
+.media-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.media-item {
+  background: #141414;
+  border: 1px solid rgba(249, 197, 213, 0.08);
+  border-radius: 1rem;
+  padding: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  word-break: break-all;
+}
+
+.media-img {
+  width: 100%;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  max-height: 200px;
+  display: block;
+}
+
+.media-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f9c5d5;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-family: 'Lato', sans-serif;
+  word-break: break-all;
+}
+
+.media-link:hover {
+  opacity: 0.8;
+}
+
+.media-link-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.media-caption {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  margin: 0.4rem 0 0.25rem 0;
+}
+
+.media-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.media-meta small {
+  font-size: 0.7rem;
+  color: rgba(249, 197, 213, 0.5);
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+}
+
+.media-delete {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  padding: 0;
+  min-width: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.media-delete:hover {
+  background: rgba(255,0,0,0.4);
+  border-color: rgba(255,0,0,0.5);
+  color: white;
+}
+
+.media-add-form {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.media-photos-strip {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  scrollbar-width: none;
+}
+
+.media-photos-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.photo-strip-item {
+  flex-shrink: 0;
+  width: 140px;
+  position: relative;
+}
+
+.strip-img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  display: block;
+}
+
+.media-type-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.media-type-btn {
+  background: transparent;
+  border: 1px solid rgba(249, 197, 213, 0.2);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.7rem;
+  padding: 0.4rem;
+  border-radius: 0.75rem;
+  font-family: 'Cinzel', serif;
+}
+
+.media-type-active {
+  background: rgba(249, 197, 213, 0.15);
+  border: 1px solid rgba(249, 197, 213, 0.4);
+  color: #f9c5d5;
+  font-size: 0.7rem;
+  padding: 0.4rem;
+  border-radius: 0.75rem;
+  font-family: 'Cinzel', serif;
+}
+
+.upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border: 1.5px dashed rgba(249, 197, 213, 0.3);
+  border-radius: 1rem;
+  color: #f9c5d5;
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-label:hover {
+  background: rgba(249, 197, 213, 0.05);
+  border-color: rgba(249, 197, 213, 0.5);
+}
+
+.upload-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1rem;
+  border-radius: 999px;
+  background: #f9c5d5;
+  color: #111;
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-align: center;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.link-preview {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: white;
+  gap: 0.5rem;
+}
+
+.link-preview-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+}
+
+.link-preview-info {
+  padding: 0.25rem 0;
+}
+
+.link-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.link-favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.link-preview-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.3;
+}
+
+.link-preview-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.5;
+  margin: 0.25rem 0;
+  font-style: italic;
+}
+
+.link-url {
+  font-size: 0.7rem;
+  color: rgba(249, 197, 213, 0.4);
+  font-family: 'Cinzel', serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  max-width: 100%;
+}
+
+.map-preview {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.map-pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+}
+
+.notes-section {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(249, 197, 213, 0.1);
+}
+
+.section-divider-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(249, 197, 213, 0.4);
+  margin: 0 0 0.6rem 0;
 }

@@ -20,7 +20,14 @@ export default function App() {
   const [bookDescriptions, setBookDescriptions] = useState({});
   const [expandedBooks, setExpandedBooks] = useState({});
   const [showShare, setShowShare] = useState(false);
-  const [copied, setCopied] = useState(false)
+  const [media, setMedia] = useState([]);
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaCaption, setMediaCaption] = useState("");
+  const [mediaType, setMediaType] = useState("image");
+  const [showAddMedia, setShowAddMedia] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [linkPreviews, setLinkPreviews] = useState({});
+  const [uploadingImage, setUploadingImage] = useState(false);
   const AVATARS = Array.from({ length: 8 }, (_, i) =>
     `https://jepinzaptcydbczofaup.supabase.co/storage/v1/object/public/avatar/avatar${i + 1}.png`
   );
@@ -90,6 +97,7 @@ export default function App() {
     loadSimilarBooks();
     loadFeedback();
     loadAttendance();
+    loadMedia();
   }
 
   async function loadMembers() {
@@ -146,6 +154,7 @@ export default function App() {
   }
 
   async function fetchBookInfo(title, author) {
+    if (!title || !author) return;
     try {
       const query = encodeURIComponent(`${title} ${author}`);
       const res = await fetch(`https://openlibrary.org/search.json?q=${query}&limit=1`);
@@ -277,6 +286,109 @@ export default function App() {
 
   function attendeesForMeeting(meetingId) {
     return attendance.filter(a => a.meeting_id === meetingId);
+  }
+
+  async function loadMedia() {
+    const { data } = await supabase
+      .from("meeting_media")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) {
+      setMedia(data);
+      data.forEach(m => {
+        if (m.media_type === "link" || m.media_type === "location") {
+          fetchLinkPreview(m.url, m.id);
+        }
+      });
+    }
+  }
+
+  function mediaForMeeting(meetingId) {
+    return media.filter(m => m.meeting_id === meetingId);
+  }
+
+  async function addMedia(meetingId) {
+    if (!mediaUrl.trim()) return;
+    await supabase.from("meeting_media").insert({
+      meeting_id: meetingId,
+      member_name: memberName,
+      media_type: mediaType,
+      url: mediaUrl,
+      caption: mediaCaption
+    });
+    setMediaUrl("");
+    setMediaCaption("");
+    setShowAddMedia(false);
+    loadMedia();
+  }
+
+  async function deleteMedia(id) {
+    await supabase.from("meeting_media").delete().eq("id", id);
+    loadMedia();
+  }
+
+  async function uploadImage(file, meetingId) {
+    const { data: { user } } = await supabase.auth.getUser()
+
+    console.log(user)
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${meetingId}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('meeting-media')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.log("Upload error:", uploadError);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from('meeting-media')
+        .getPublicUrl(fileName);
+
+      await supabase.from("meeting_media").insert({
+        meeting_id: meetingId,
+        member_name: memberName,
+        media_type: "image",
+        url: data.publicUrl,
+        caption: mediaCaption
+      });
+
+      setMediaCaption("");
+      loadMedia();
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
+  async function fetchLinkPreview(url, id) {
+    if (!url || linkPreviews[id]) return;
+    try {
+      const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      if (data.status === 'success') {
+        let favicon = '';
+        try {
+          favicon = `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=32`;
+        } catch {
+          favicon = '';
+        }
+        setLinkPreviews(prev => ({
+          ...prev,
+          [id]: {
+            title: data.data?.title || null,
+            description: data.data?.description || null,
+            image: data.data?.image?.url || null,
+            favicon
+          }
+        }));
+      }
+    } catch (e) {
+      console.log("Preview failed", e);
+    }
   }
 
   async function enterApp() {
@@ -446,6 +558,7 @@ export default function App() {
   }
 
   function getBookCover(title) {
+    if (!title) return '';
     const query = encodeURIComponent(title);
     return `https://covers.openlibrary.org/b/title/${query}-M.jpg?default=false`;
   }
@@ -746,11 +859,174 @@ export default function App() {
                     {isAttending(meetings[0].id) ? "✦ I can't make it" : "✦ I'm attending!"}
                   </button>
                 </div>
-                <button onClick={() => { setPage("community"); setCommunityPage("notes"); }}>
-                  Open Notes
-                </button>
+                <div className="media-section">
+                  <p className="meeting-label">✦ Photos & Links</p>
+                  {mediaForMeeting(meetings[0].id).length === 0 && (
+                    <p className="small">No photos or links yet.</p>
+                  )}
+                  <div className="media-photos-strip">
+                    {mediaForMeeting(meetings[0]?.id || selectedArchive?.id)
+                      .filter(m => m.media_type === "image")
+                      .map(m => (
+                        <div key={m.id} className="photo-strip-item">
+                          <a href={m.url} target="_blank" rel="noopener noreferrer">
+                            <img src={m.url} alt={m.caption || "photo"} className="strip-img" />
+                          </a>
+                          {m.caption && <p className="media-caption">{m.caption}</p>}
+                          <span className="media-meta">
+                            <img
+                              src={membersMap[m.member_name] || AVATARS[0]}
+                              alt={m.member_name}
+                              className="avatar-tiny"
+                              style={{ width: 20, height: 20 }}
+                            />
+                            <small>{m.member_name}</small>
+                          </span>
+                          {(isAdmin || m.member_name === memberName) && (
+                            <button className="media-delete" onClick={() => deleteMedia(m.id)}>✕</button>
+                          )}
+                        </div>
+                      ))
+                    }
+                  </div>
+
+                  {mediaForMeeting(meetings[0]?.id || selectedArchive?.id)
+                    .filter(m => m.media_type === "link" || m.media_type === "location")
+                    .map(m => {
+                      const preview = linkPreviews[m.id];
+                      return (
+                        <div key={m.id} className="media-item">
+                          <a href={m.url} target="_blank" rel="noopener noreferrer" className="link-preview">
+                            {preview?.image && m.media_type === "link" && (
+                              <img src={preview.image} alt={preview.title} className="link-preview-img" />
+                            )}
+                            {m.media_type === "location" && (
+                              <div className="map-preview">
+                                <img
+                                  src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(m.caption || "location")}&zoom=14&size=400x120&style=feature:all|element:labels.text.fill|color:0x887785&key=YOUR_API_KEY`}
+                                  alt="map"
+                                  className="link-preview-img"
+                                  onError={(e) => { e.target.style.display = 'none' }}
+                                />
+                                <div className="map-pin">📍</div>
+                              </div>
+                            )}
+                            <div className="link-preview-info">
+                              <div className="link-preview-header">
+                                {preview?.favicon && (
+                                  <img src={preview.favicon} alt="" className="link-favicon" />
+                                )}
+                                <span className="link-preview-title">
+                                  {m.media_type === "location" ? "📍 " : "🔗 "}
+                                  {preview?.title || m.caption || m.url}
+                                </span>
+                              </div>
+                              {preview?.description && (
+                                <p className="link-preview-desc">{preview.description.slice(0, 100)}...</p>
+                              )}
+                              <small className="link-url">{m.url.slice(0, 40)}...</small>
+                            </div>
+                          </a>
+                          <span className="media-meta" style={{ marginTop: "0.5rem" }}>
+                            <img
+                              src={membersMap[m.member_name] || AVATARS[0]}
+                              alt={m.member_name}
+                              className="avatar-tiny"
+                              style={{ width: 20, height: 20 }}
+                            />
+                            <small>{m.member_name}</small>
+                          </span>
+                          {(isAdmin || m.member_name === memberName) && (
+                            <button className="media-delete" onClick={() => deleteMedia(m.id)}>✕</button>
+                          )}
+                        </div>
+                      );
+                    })
+                  }
+                  {!showAddMedia ? (
+                    <button
+                      className="secondary"
+                      style={{ marginTop: "0.75rem" }}
+                      onClick={() => setShowAddMedia(true)}
+                    >
+                      + Add photo or link
+                    </button>
+                  ) : (
+                    <div className="media-add-form">
+                      <div className="media-type-tabs">
+                        <button
+                          className={mediaType === "image" ? "media-type-active" : "media-type-btn"}
+                          onClick={() => setMediaType("image")}
+                        >
+                          📷 Photo
+                        </button>
+                        <button
+                          className={mediaType === "link" ? "media-type-active" : "media-type-btn"}
+                          onClick={() => setMediaType("link")}
+                        >
+                          🔗 Link
+                        </button>
+                        <button
+                          className={mediaType === "location" ? "media-type-active" : "media-type-btn"}
+                          onClick={() => setMediaType("location")}
+                        >
+                          📍 Location
+                        </button>
+                      </div>
+
+                      {mediaType === "image" ? (
+                        <>
+                          <div className="book-actions" style={{ alignItems: "stretch" }}>
+                            <label className="upload-btn">
+                              {uploadingImage ? "Uploading..." : "Add Photo"}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                style={{ display: "none" }}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) uploadImage(file, meetings[0]?.id || selectedArchive?.id);
+                                }}
+                              />
+                            </label>
+                            <button className="secondary" onClick={() => setShowAddMedia(false)}>
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <input
+                            placeholder={mediaType === "location" ? "Paste Google Maps link..." : "Paste link URL..."}
+                            value={mediaUrl}
+                            onChange={e => setMediaUrl(e.target.value)}
+                          />
+                          <input
+                            placeholder="Caption (optional)"
+                            value={mediaCaption}
+                            onChange={e => setMediaCaption(e.target.value)}
+                          />
+                          <div className="book-actions">
+                            <button onClick={() => addMedia(meetings[0]?.id || selectedArchive?.id)}>Add</button>
+                            <button className="secondary" onClick={() => setShowAddMedia(false)}>Cancel</button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="notes-section">
+                  <p className="section-divider-label">Notes</p>
+                  <button
+                    style={{ width: "100%" }}
+                    onClick={() => { setPage("community"); setCommunityPage("notes"); }}
+                  >
+                    📝 Open Notes
+                  </button>
+                </div>
               </div>
             </div>
+
           ) : (
             <p className="small">No upcoming meeting yet.</p>
           )}
@@ -1347,6 +1623,180 @@ export default function App() {
               <button onClick={() => addSimilarBook(selectedArchive.id)}>
                 Add similar book
               </button>
+
+              <h3>Photos & Links</h3>
+
+              {mediaForMeeting(selectedArchive.id).length === 0 && (
+                <p className="small">No photos or links yet.</p>
+              )}
+
+              <div className="media-photos-strip">
+                {mediaForMeeting(meetings[0]?.id || selectedArchive?.id)
+                  .filter(m => m.media_type === "image")
+                  .map(m => (
+                    <div key={m.id} className="photo-strip-item">
+                      <a href={m.url} target="_blank" rel="noopener noreferrer">
+                        <img src={m.url} alt={m.caption || "photo"} className="strip-img" />
+                      </a>
+                      {m.caption && <p className="media-caption">{m.caption}</p>}
+                      <span className="media-meta">
+                        <img
+                          src={membersMap[m.member_name] || AVATARS[0]}
+                          alt={m.member_name}
+                          className="avatar-tiny"
+                          style={{ width: 20, height: 20 }}
+                        />
+                        <small>{m.member_name}</small>
+                      </span>
+                      {(isAdmin || m.member_name === memberName) && (
+                        <button className="media-delete" onClick={() => deleteMedia(m.id)}>✕</button>
+                      )}
+                    </div>
+                  ))
+                }
+              </div>
+
+              {mediaForMeeting(meetings[0]?.id || selectedArchive?.id)
+                .filter(m => m.media_type === "link" || m.media_type === "location")
+                .map(m => {
+                  const preview = linkPreviews[m.id];
+                  return (
+                    <div key={m.id} className="media-item">
+                      <a href={m.url} target="_blank" rel="noopener noreferrer" className="link-preview">
+                        {preview?.image && m.media_type === "link" && (
+                          <img src={preview.image} alt={preview.title} className="link-preview-img" />
+                        )}
+                        {m.media_type === "location" && (
+                          <div className="map-preview">
+                            <img
+                              src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(m.caption || "location")}&zoom=14&size=400x120&style=feature:all|element:labels.text.fill|color:0x887785&key=YOUR_API_KEY`}
+                              alt="map"
+                              className="link-preview-img"
+                              onError={(e) => { e.target.style.display = 'none' }}
+                            />
+                            <div className="map-pin">📍</div>
+                          </div>
+                        )}
+                        <div className="link-preview-info">
+                          <div className="link-preview-header">
+                            {preview?.favicon && (
+                              <img src={preview.favicon} alt="" className="link-favicon" />
+                            )}
+                            <span className="link-preview-title">
+                              {m.media_type === "location" ? "📍 " : "🔗 "}
+                              {preview?.title || m.caption || m.url}
+                            </span>
+                          </div>
+                          {preview?.description && (
+                            <p className="link-preview-desc">{preview.description.slice(0, 100)}...</p>
+                          )}
+                          <small className="link-url">{m.url.slice(0, 40)}...</small>
+                        </div>
+                      </a>
+                      <span className="media-meta" style={{ marginTop: "0.5rem" }}>
+                        <img
+                          src={membersMap[m.member_name] || AVATARS[0]}
+                          alt={m.member_name}
+                          className="avatar-tiny"
+                          style={{ width: 20, height: 20 }}
+                        />
+                        <small>{m.member_name}</small>
+                      </span>
+                      {(isAdmin || m.member_name === memberName) && (
+                        <button className="media-delete" onClick={() => deleteMedia(m.id)}>✕</button>
+                      )}
+                    </div>
+                  );
+                })
+              }
+
+              {!showAddMedia ? (
+                <button
+                  className="secondary"
+                  style={{ marginTop: "0.75rem" }}
+                  onClick={() => setShowAddMedia(true)}
+                >
+                  + Add photo or link
+                </button>
+              ) : (
+                <div className="media-add-form">
+                  <div className="media-type-tabs">
+                    <button
+                      className={mediaType === "image" ? "media-type-active" : "media-type-btn"}
+                      onClick={() => setMediaType("image")}
+                    >
+                      📷 Photo
+                    </button>
+                    <button
+                      className={mediaType === "link" ? "media-type-active" : "media-type-btn"}
+                      onClick={() => setMediaType("link")}
+                    >
+                      🔗 Link
+                    </button>
+                    <button
+                      className={mediaType === "location" ? "media-type-active" : "media-type-btn"}
+                      onClick={() => setMediaType("location")}
+                    >
+                      📍 Location
+                    </button>
+                  </div>
+
+                  {mediaType === "image" ? (
+                    <>
+                      <label className="upload-label">
+                        {uploadingImage ? "Uploading..." : "📷 Tap to choose a photo"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) uploadImage(file, meetings[0]?.id || selectedArchive?.id);
+                          }}
+                        />
+                      </label>
+                      <input
+                        placeholder="Caption (optional)"
+                        value={mediaCaption}
+                        onChange={e => setMediaCaption(e.target.value)}
+                      />
+                      <div className="book-actions">
+                        <button onClick={() => {
+                          const input = document.querySelector('input[type="file"]');
+                          if (input) input.click();
+                        }}>
+                          {uploadingImage ? "Uploading..." : "Add"}
+                        </button>
+                        <button className="secondary" onClick={() => setShowAddMedia(false)}>
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        placeholder={mediaType === "location" ? "Paste Google Maps link..." : "Paste link URL..."}
+                        value={mediaUrl}
+                        onChange={e => setMediaUrl(e.target.value)}
+                      />
+                      <input
+                        placeholder="Caption (optional)"
+                        value={mediaCaption}
+                        onChange={e => setMediaCaption(e.target.value)}
+                      />
+                      <div className="book-actions">
+                        <button onClick={() => addMedia(meetings[0]?.id || selectedArchive?.id)}>Add</button>
+                        <button className="secondary" onClick={() => setShowAddMedia(false)}>Cancel</button>
+                      </div>
+                    </>
+                  )}
+
+                  {/* <button className="secondary" style={{ marginTop: "0.25rem" }} onClick={() => setShowAddMedia(false)}>
+                    Cancel
+                  </button> */}
+                </div>
+              )}
+
             </div>
           </div>
         )
