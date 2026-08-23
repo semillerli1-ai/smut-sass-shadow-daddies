@@ -418,6 +418,12 @@ export default function App() {
     setAdminCode("");
   }
 
+  function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}.${month}.${year}`;
+}
+
   async function addBook() {
     if (!bookTitle.trim()) return;
 
@@ -811,7 +817,7 @@ export default function App() {
                 </h3>
                 <p className="meeting-author">by {meetings[0].author}</p>
                 <div className="meeting-date-row">
-                  <span className="meeting-pill">📅 {meetings[0].meeting_date}</span>
+                  <span className="meeting-pill">📅 {formatDate(meetings[0].meeting_date)}</span>
                   <span className="meeting-pill">🕯️ {meetings[0].meeting_time}</span>
                 </div>
                 <div className="attendance-section">
@@ -1024,6 +1030,32 @@ export default function App() {
                   </button>
                 </div>
               </div>
+              {meetings.slice(1).length > 0 && (
+                <div className="upcoming-meetings">
+                  <p className="meeting-label" style={{ marginBottom: "0.75rem" }}>✦ Upcoming Meetings</p>
+                  {meetings.slice(1).map(m => (
+                    <div key={m.id} className="upcoming-item">
+                      <img
+                        src={m.cover_url || getBookCover(m.book_title)}
+                        alt={m.book_title}
+                        className="upcoming-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = `https://dummyimage.com/300x200/1a1a2e/f9c5d5.png&text=${encodeURIComponent(m.book_title)}`
+                        }}
+                      />
+                      <div className="upcoming-info">
+                        <strong>{m.book_title}</strong>
+                        <p className="meeting-author">by {m.author}</p>
+                        <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.4rem" }}>
+                         <span className="meeting-pill">📅 {formatDate(meetings[0].meeting_date)}</span>
+                          <span className="meeting-pill">🕯️ {m.meeting_time}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
           ) : (
@@ -1079,7 +1111,7 @@ export default function App() {
                 <div className="current-book-card">
                   <div className="current-book-layout">
                     <img
-                      src={getBookCover(meetings[0].book_title)}
+                      src={meetings[0].cover_url || getBookCover(meetings[0].book_title)}
                       alt={meetings[0].book_title}
                       className="current-book-cover"
                       onError={(e) => {
@@ -1279,7 +1311,7 @@ export default function App() {
                       <div>
                         <strong>{m.book_title}</strong>
                         <p>by {m.author}</p>
-                        <span className="meeting-pill">⌛ {m.meeting_date}</span>
+                        <span className="meeting-pill">⌛ {formatDate(m.meeting_date)}</span>
                       </div>
                       <button className="discussion-btn" onClick={() => setSelectedArchive(m)}>
                         💬 Discussion
@@ -1525,7 +1557,7 @@ export default function App() {
               <div className="modal-meta">
                 <p>by {selectedArchive.author}</p>
                 <p>✦</p>
-                <p>{selectedArchive.meeting_date}</p>
+                <p>{formatDate(selectedArchive.meeting_date)}</p>
               </div>
 
               <h3>Ratings</h3>
