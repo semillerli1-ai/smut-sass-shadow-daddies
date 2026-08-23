@@ -114,7 +114,6 @@ export default function App() {
       .from("meetings")
       .select("*")
       .order("meeting_date");
-
     if (!data) return;
 
     const upcoming = [];
@@ -797,7 +796,7 @@ export default function App() {
           {meetings[0] ? (
             <div className="meeting-card">
               <img
-                src={getBookCover(meetings[0].book_title)}
+                src={meetings[0].cover_url || getBookCover(meetings[0].book_title)}
                 alt={meetings[0].book_title}
                 className="meeting-cover"
                 onError={(e) => {
