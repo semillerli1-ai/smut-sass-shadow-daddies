@@ -818,7 +818,7 @@ export default function App() {
                 <p className="meeting-author">by {meetings[0].author}</p>
                 <div className="meeting-date-row">
                   <span className="meeting-pill">📅 {formatDate(meetings[0].meeting_date)}</span>
-                  <span className="meeting-pill">🕯️ {meetings[0].meeting_time}</span>
+                  <span className="meeting-pill">🕯️ {meetings[0].meeting_time || "TBD"}</span>
                 </div>
                 <div className="attendance-section">
                   <p className="meeting-label">✦ Who's coming</p>
@@ -1048,8 +1048,8 @@ export default function App() {
                         <strong>{m.book_title}</strong>
                         <p className="meeting-author">by {m.author}</p>
                         <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.4rem" }}>
-                         <span className="meeting-pill">📅 {formatDate(meetings[0].meeting_date)}</span>
-                          <span className="meeting-pill">🕯️ {m.meeting_time}</span>
+                         <span className="meeting-pill">📅 {formatDate(m.meeting_date)}</span>
+                          <span className="meeting-pill">🕯️ {m.meeting_time || "TBD"}</span>
                         </div>
                       </div>
                     </div>
