@@ -1150,7 +1150,7 @@ export default function App() {
                   <div key={b.id} className="top3-row">
                     <span className="top3-rank">{index + 1}</span>
                     <img
-                      src={getBookCover(b.title)}
+                       src={b.cover_url || getBookCover(b.title)}
                       alt={b.title}
                       className="top3-cover"
                       onError={(e) => {
